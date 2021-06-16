@@ -1,0 +1,6 @@
+[workspace]
+members = ["fip_api", "fip_common"]
+
+# [workspace.metadata.webcontents]
+# root = "path/to/webproject"
+# tool = ["npm", "run", "build"]

@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package fip.api.api;
+
+service Api {
+    rpc HelloWorld (ApiHelloWorldReqDto) returns (ApiResDto);
+}
+
+message ApiHelloWorldReqDto {
+    string id = 1;
+}
+
+message ApiResDto {
+    string id = 1;
+}
