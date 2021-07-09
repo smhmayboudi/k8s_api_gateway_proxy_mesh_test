@@ -1,12 +1,12 @@
-# ssh key
+# SSH Key
 
 ```bash
-$ ssh-keygen -t ed25519 -C "{EMAIL_ADDRESS}"
-$ ssh-keygen -t rsa -b 4096 -C "{EMAIL_ADDRESS}"
+$ ssh-keygen -t ed25519 -C "${EMAIL_ADDRESS}"
+$ ssh-keygen -t rsa -b 4096 -C "${EMAIL_ADDRESS}"
 $ cat ~/.ssh/id_rsa.pub
 ```
 
-# gpg key
+# GPG Key
 
 ```bash
 $ gpg --full-generate-key
@@ -14,20 +14,12 @@ $ gpg --list-secret-keys --keyid-format LONG {EMAIL_ADDRESS}
 $ gpg --armor --export {SEC_ID}
 $ git config --global commit.gpgsign true
 $ git config --global gpg.program gpg
-$ git config --global user.email "{EMAIL_ADDRESS}"
-$ git config --global user.name "{FIRST_NAME} {LAST_NAME}"
-$ git config --global user.signingkey {SEC_ID}
-$ gpg --full-generate-key
-$ gpg --list-secret-keys --keyid-format LONG {EMAIL_ADDRESS}
-$ gpg --armor --export {SEC_ID}
-$ git config --global commit.gpgsign true
-$ git config --global gpg.program gpg
-$ git config --global user.email "{EMAIL_ADDRESS}"
-$ git config --global user.name "{FIRST_NAME} {LAST_NAME}"
+$ git config --global user.email "${EMAIL_ADDRESS}"
+$ git config --global user.name "${FIRST_NAME} ${LAST_NAME}"
 $ git config --global user.signingkey {SEC_ID}
 ```
 
-# rustup
+# Rustup
 
 ```bash
 $ curl https://sh.rustup.rs -sSf | sh -s
@@ -54,18 +46,20 @@ $ rustup update && rustup self update
 ### Install
 
 ```bash
-$ cargo install cargo-audit
-$ cargo install cargo-cache
-$ cargo install cargo-diet
-$ cargo install cargo-edit
-$ cargo install cargo-expand
-$ cargo install cargo-inspect
-$ cargo install cargo-make
-$ cargo install cargo-modules
-$ cargo install cargo-outdated
-$ cargo install cargo-readme
-$ cargo install cargo-spellcheck
-$ cargo install cargo-watch
+$ cargo install --locked \
+    cargo-audit \
+    cargo-cache \
+    cargo-deny \
+    cargo-diet \
+    cargo-edit \
+    cargo-expand \
+    cargo-inspect \
+    cargo-make \
+    cargo-modules \
+    cargo-outdated \
+    cargo-readme \
+    cargo-spellcheck \
+    cargo-watch
 ```
 
 ### Run
@@ -93,28 +87,28 @@ $ cargo vendor
 ## Tools
 
 ```bash
-$ cargo install critcmp
-$ cargo install flamegraph
-$ cargo install grcov
-$ cargo install mdbook
-$ cargo install ripgrep
-$ cargo install rustscan
-$ cargo install sqlx-cli
+$ cargo install \
+    critcmp \
+    flamegraph \
+    grcov \
+    mdbook \
+    ripgrep \
+    rustscan \
+    sqlx-cli
 ```
 
-```
-cargo bench -- --save-baseline before
-cargo bench -- --save-baseline change
-critcmp before change
+```bash
+$ cargo bench -- --save-baseline before
+$ cargo bench -- --save-baseline change
+$ critcmp before change
 ```
 
-# HELP
+# Help
 
-```
-cargo watch -x "run | bunyan"
-catflap -- cargo watch -x "run | bunyan"
+```bash
+$ cargo watch -x "run | bunyan"
 
-grpcurl \
+$ grpcurl \
     -d '{"id":"E5D86E1D-31A4-4964-9881-F160FC5B1073"}' \
     -import-path fip_api/proto \
     -plaintext \
@@ -122,10 +116,10 @@ grpcurl \
     127.0.0.1:8080 fip.api.api.Api/HelloWorld
 ```
 
-# HUSKY
+# Husky
 
 ```bash
-CARGO_HUSKY_DONT_INSTALL_HOOKS=true cargo test
+$ CARGO_HUSKY_DONT_INSTALL_HOOKS=true cargo test
 ```
 
 # TLS
@@ -150,12 +144,13 @@ $ openssl x509 -req -in server.csr -CA my_ca.pem -CAkey my_ca.key -CAcreateseria
 # Jaeger Tracing
 
 ```bash
-docker run -d -p6831:6831/udp -p6832:6832/udp -p16686:16686 jaegertracing/all-in-one:latest
+$ docker run -d -p6831:6831/udp -p6832:6832/udp -p16686:16686 jaegertracing/all-in-one:1.23.0
+$ docker run -d -p 9411:9411 openzipkin/zipkin:2.23.2
 ```
 
-# k8s
+# K8S
 
-## k8s cluster create
+## K8S Cluster Create
 
 ```bash
 # 1st WAY
@@ -178,7 +173,7 @@ $ minikube start
 $ brew install k3d
 ```
 
-## k8s cluster working
+## K8S Cluster Working
 
 ```bash
 $ brew install helm
@@ -187,7 +182,7 @@ $ brew install kubectx
 $ brew install kubernetes-cli
 ```
 
-## k8s cluster working with UI !?
+## k8s Cluster Working with UI
 
 ```bash
 $ brew cask install lens
@@ -218,14 +213,81 @@ $ linkerd check
 $ linkerd viz dashboard &
 $ linkerd -n linkerd-viz viz top deployment/web [ERROR]
 
-$ docker build . -f ./fip_api/Dockerfile -t fip_api_service:0.1.0
-$ docker tag fip_api_service:0.1.0 localhost:5000/fip_api_service:0.1.0
-$ docker push localhost:5000/fip_api_service:0.1.0
-$ cat ./fip_api/fip_api_service.yml | kubectl apply -f -
+$ docker build . -f ./fip_api/Dockerfile -t fip-api-service:0.1.0-nonroot
+$ docker tag fip-api-service:0.1.0-nonroot localhost:5000/fip-api-service:0.1.0-nonroot
+$ docker push localhost:5000/fip-api-service:0.1.0-nonroot
+$ cat ./fip_api/fip-api-service.yml | kubectl apply -f -
 $ 
-$ kubectl -n fip-api-namespace port-forward deployment/fip-api-deployment 8080:8080
+$ kubectl -n fip-api-namespace port-forward service/fip-api-service 8080:8080
 $ 
 $ kubectl get -n fip-api-namespace deployment -o yaml | linkerd inject - | kubectl apply -f -
 $ linkerd -n fip-api-namespace check --proxy
 $ linkerd -n fip-api-namespace viz stat deployment
 ```
+
+# Docker
+
+```bash
+$ docker pull debian:stable-slim
+$ docker pull jaegertracing/all-in-one:1.23.0
+$ docker pull materialize/materialized:v0.8.0
+$ docker pull registry:2.7.1
+$ docker pull rust:1.53.0
+$ docker pull timberio/vector:0.14.X-distroless-static
+$ docker pull vectorized/redpanda:v21.6.2
+```
+
+# Docker Content Trust
+
+```bash
+$ docker trust key generate {NAME}
+
+# LOAD
+$ docker trust key load {NAME}.pem --name {NAME}
+
+$ docker trust signer add --key {NAME}.pem {NAME} localhost:5000/fip-api-service
+$ docker trust sign localhost:5000/fip-api-service:0.1.0-nonroot
+$ export DOCKER_CONTENT_TRUST=1
+$ docker push localhost:5000/fip-api-service:0.1.0-nonroot
+
+# TEST
+$ docker trust inspect --pretty localhost:5000/fip-api-service:0.1.0-nonroot
+
+# REMOVE
+$ docker trust revoke localhost:5000/fip-api-service:0.1.0-nonroot
+```
+
+# Note
+
+Created => 1970-01-01T00:00:00Z
+"Metadata": {
+    "LastTagTime": "0001-01-01T00:00:00Z"
+}
+
+# Extra
+
+```bash
+$ rustup target add \
+    aarch64-unknown-linux-musl \
+    armv7-unknown-linux-musleabihf \
+    x86_64-unknown-linux-musl
+$ cargo build --package fip_api --release --target x86_64-unknown-linux-musl
+
+$ docker build . -f ./fip_api/Dockerfile -t fip-api-service:0.1.0-nonroot
+$ docker run -e LINKERD_AWAIT_DISABLED=TRUE -i -p 8080:8080 --rm fip-api-service:0.1.0-nonroot
+
+$ shasum -a 256 target/release/fip_api
+
+$ brew install upx
+$ upx --ultra-brute ./target/x86_64-unknown-linux-musl/release/fip_api
+```
+
+# WHICH CRATE ?
+
+CARGO_INCREMENTAL=0
+RUSTDOCFLAGS="-Cpanic=abort"
+RUSTFLAGS="-Zprofile -Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off -Zpanic_abort_tests -Cpanic=abort"
+RUST_BACKTRACE=FULL
+RUST_LIB_BACKTRACE=FULL
+RUST_LOG=INFO
+RUST_LOG_STYLE=NEVER

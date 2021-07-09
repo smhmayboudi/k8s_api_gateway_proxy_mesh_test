@@ -1,3 +1,40 @@
+[profile.dev]
+codegen-units = 256
+debug = true
+debug-assertions = true
+incremental = true
+lto = false
+opt-level = 0
+overflow-checks = true
+panic = "unwind"
+rpath = false
+split-debuginfo = "off"
+
+[profile.test]
+codegen-units = 256
+debug = 2
+debug-assertions = true
+incremental = true
+lto = false
+opt-level = 0
+overflow-checks = true
+panic = "unwind"
+rpath = false
+split-debuginfo = "off"
+
+[profile.release]
+codegen-units = 1
+debug = false
+debug-assertions = false
+incremental = false
+lto = true
+opt-level = "z"
+overflow-checks = false
+panic = "abort"
+rpath = false
+split-debuginfo = "off"
+
+
 [workspace]
 members = ["fip_api", "fip_common"]
 

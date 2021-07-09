@@ -25,7 +25,7 @@ rustflags = [
     "-Dunsafe_code",
     # "-Dunsafe_op_in_unsafe_fn",
     "-Dunstable_features",
-    "-Dunused_crate_dependencies",
+    # "-Dunused_crate_dependencies",
     "-Dunused_extern_crates",
     "-Dunused_import_braces",
     "-Dunused_lifetimes",
@@ -34,7 +34,6 @@ rustflags = [
     "-Dvariant_size_differences",
     "-Dwarnings"
 ]
-
 rustdocflags = [
     "-Dabsolute_paths_not_starting_with_crate",
     "-Danonymous_parameters",
@@ -76,3 +75,18 @@ replace-with = "vendored-sources"
 
 [source.vendored-sources]
 directory = "vendor"
+
+[target.aarch64-unknown-linux-musl]
+linker = "lld"
+# runner = ""
+# rustflags = []
+
+[target.armv7-unknown-linux-muslleabihf]
+linker = "lld"
+# runner = ""
+# rustflags = []
+
+[target.x86_64-unknown-linux-musl]
+linker = "lld"
+# runner = ""
+# rustflags = []

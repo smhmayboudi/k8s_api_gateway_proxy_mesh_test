@@ -3,8 +3,15 @@ pub mod config;
 pub mod server;
 
 use crate::{config::Config, server::Server};
-use opentelemetry::sdk::propagation::TraceContextPropagator;
-use opentelemetry::KeyValue;
+use opentelemetry::{
+    runtime::Tokio,
+    sdk::{
+        trace::{self, Sampler},
+        Resource,
+    },
+    KeyValue,
+};
+use opentelemetry_zipkin::Propagator;
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_error::ErrorLayer;
 use tracing_subscriber::{
@@ -16,12 +23,20 @@ use tracing_subscriber::{
 async fn main() -> anyhow::Result<()> {
     let config = Config::default();
 
-    opentelemetry::global::set_text_map_propagator(TraceContextPropagator::new());
-    let tracer = opentelemetry_jaeger::new_pipeline()
+    opentelemetry::global::set_text_map_propagator(Propagator::new());
+    let tracer = opentelemetry_zipkin::new_pipeline()
         // .from_env()
         .with_service_name(&config.app_name())
-        .with_tags(vec![KeyValue::new("version", config.app_version())])
-        .install_simple()
+        // .with_tags(vec![KeyValue::new("version", config.app_version())])
+        .with_trace_config(
+            trace::config()
+                .with_sampler(Sampler::AlwaysOn)
+                .with_resource(Resource::new(vec![KeyValue::new(
+                    "version",
+                    config.app_version(),
+                )])),
+        )
+        .install_batch(Tokio)
         .map_err(|err| {
             tracing::error!("{:?}", err);
             anyhow::anyhow!(err)

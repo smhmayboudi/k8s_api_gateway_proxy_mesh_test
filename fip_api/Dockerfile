@@ -1,4 +1,10 @@
-FROM rust:1.52.1 as build-env
+FROM docker.io/curlimages/curl:7.77.0 as linkerd
+ARG LINKERD_AWAIT_VERSION=v0.2.3
+ENV LINKERD_AWAIT_VERSION=${LINKERD_AWAIT_VERSION}
+RUN curl -sSLo /tmp/linkerd-await https://github.com/linkerd/linkerd-await/releases/download/release%2F${LINKERD_AWAIT_VERSION}/linkerd-await-${LINKERD_AWAIT_VERSION}-amd64 && \
+    chmod 755 /tmp/linkerd-await
+
+FROM rust:1.53.0 as builder
 WORKDIR /fip
 ADD . .
 RUN rustup component add rustfmt
@@ -6,11 +12,9 @@ RUN rustup component add rustfmt
 # RUN RUN cargo vendor > .cargo/config
 RUN cargo build --release --package fip_api
 
-FROM debian:stable-slim
-RUN addgroup --gid 1000 fip
-RUN adduser --gid 1000 --shell /bin/sh --uid 1000 fip
-WORKDIR /fip_api
-COPY --from=build-env /fip/target/release/fip_api .
-RUN chown fip:fip *
-USER fip
-CMD ["./fip_api"]
+FROM gcr.io/distroless/cc:nonroot
+COPY --from=linkerd /tmp/linkerd-await /linkerd-await
+COPY --from=builder /fip/target/release/fip_api /
+USER 65532
+ENTRYPOINT ["/linkerd-await", "--shutdown", "--"]
+CMD ["/fip_api"]
