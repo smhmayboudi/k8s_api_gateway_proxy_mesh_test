@@ -1,5 +1,17 @@
+# [[bench]]
+
+# [[bin]]
+
+# [[example]]
+
+# [[test]]
+
+# [badges]
+
+# [build-dependencies]
+
 [dependencies]
-opentelemetry = { default-features = false, features = ["trace"], version = "0.14.0" }
+opentelemetry = { default-features = false, features = ["trace"], version = "0.15.0" }
 thiserror = { default-features = false, version = "1.0.26" }
 tonic = { default-features = false, features = ["transport"], version = "0.5.0" }
 tracing-error = { default-features = false, version = "0.1.2" }
@@ -7,6 +19,8 @@ tracing-error = { default-features = false, version = "0.1.2" }
 [dev-dependencies]
 cargo-husky = { default-features = false, features = ["user-hooks"], version = "1.5.0" }
 # mockall = { default-features = false, features = ["user-hooks"], version = "0.10.1" }
+
+# [features]
 
 [lib]
 # bench = true          # Is benchmarked by default.
@@ -17,9 +31,8 @@ crate-type = ["rlib"]   # The crate types to generate.
 # harness = true        # Use libtest harness.
 name = "fip_common"     # The name of the target.
 path = "src/lib.rs"     # The source file of the target.
-# plugin = false        # Used as a compiler plugin (deprecated).
 # proc-macro = false    # Set to `true` for a proc-macro library.
-required-features = []  # Features required to build this target (N/A for lib).
+# required-features = []# Features required to build this target (N/A for lib).
 # test = true           # Is tested by default.
 
 [package]
@@ -29,9 +42,20 @@ description = "fip_common"
 edition = "2018"
 homepage = ""
 include = ["src/**/*"]
-keywords = ["fpi", "common"]
+keywords = [
+    "fpi",
+    "common",
+]
 license = "MIT"
 name = "fip_common"
 publish = false
 repository =  "https://github.com/smhmayboudi/fip"
 version = "0.1.0"
+
+# [profile]
+
+# [patch]
+
+# [replace]
+
+# [workspace]

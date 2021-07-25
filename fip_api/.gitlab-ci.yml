@@ -1,0 +1,42 @@
+# BEGIN project-specific configurfip_apiion
+
+.fip_api: &fip_api
+  variables:
+    MODULE_NAME: "fip_api"
+    IMAGE_NAME: "fip-api-service"
+    DOCKERFILE: "apps/fip_api/docker/development/Dockerfile"
+  only:
+    changes:
+    - "/fip_api/**/*"
+
+# END project-specific configurfip_apiion
+
+# BEGIN actual pipeline definition
+
+build:fip_api:
+  extends:
+  - ".build"
+  - ".fip_api"
+
+test:fip_api:
+  dependencies:
+  - "build:fip_api"
+  extends:
+  - ".test"
+  - ".fip_api"
+
+coverage:fip_api:
+  dependencies:
+  - "test:fip_api"
+  extends:
+  - ".coverage"
+  - ".fip_api"
+
+dockerization:fip_api:
+  dependencies:
+  - "test:fip_api"
+  extends:
+  - ".dockerization"
+  - ".fip_api"
+
+# END actual pipeline definition

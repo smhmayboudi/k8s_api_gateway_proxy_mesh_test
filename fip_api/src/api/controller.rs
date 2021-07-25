@@ -5,6 +5,7 @@ use crate::api::{
 };
 // use fip_common::common_opentelemetry::MetadataMap;
 use tonic::{Request, Response, Status};
+// use tracing::Span;
 // use tracing_opentelemetry::OpenTelemetrySpanExt;
 
 #[derive(Debug)]
@@ -33,7 +34,7 @@ impl Api for Controller {
         // let parent_context = opentelemetry::global::get_text_map_propagator(|propagator| {
         //     propagator.extract(&MetadataMap(request.metadata()))
         // });
-        // let span = tracing::Span::current();
+        // let span = Span::current();
         // span.set_parent(parent_context);
         let req = request.get_ref();
         let res = self.service.hello_world(req).await?;

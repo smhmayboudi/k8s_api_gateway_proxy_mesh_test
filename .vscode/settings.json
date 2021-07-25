@@ -36,6 +36,5 @@
     ],
     "sqltools.useNodeRuntime": true,
     "workbench.iconTheme": "material-icon-theme",
-    "workbench.startupEditor": "newUntitledFile",
-    "rust-client.disableRustup": true
+    "workbench.startupEditor": "newUntitledFile"
 }

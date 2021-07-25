@@ -2,9 +2,11 @@ use crate::{
     api::controller::Controller, api::proto::server::api_server::ApiServer as ProtoApiServer,
     api::server::Server as ApiServer, config::Config,
 };
+use anyhow::Result;
 use tonic::transport::Server as TonicServer;
 use tonic_health::server::HealthReporter;
 use tracing::Level;
+// use tracing::Span;
 // use tracing_opentelemetry::OpenTelemetrySpanExt;
 
 #[derive(Debug)]
@@ -28,7 +30,7 @@ impl Server {
         }
     }
 
-    pub async fn init(config: Config) -> anyhow::Result<()> {
+    pub async fn init(config: &Config) -> Result<()> {
         let (mut health_reporter, health_server) = tonic_health::server::health_reporter();
         health_reporter
             .set_serving::<ProtoApiServer<Controller>>()
@@ -45,7 +47,7 @@ impl Server {
             //                     header_map.clone(),
             //                 ))
             //             });
-            //             let span = tracing::Span::current();
+            //             let span = Span::current();
             //             span.set_parent(parent_context);
             //             span
             //         },

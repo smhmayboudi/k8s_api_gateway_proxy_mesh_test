@@ -1,59 +1,78 @@
+# [[bench]]
+
 [[bin]]
 # bench = true          # Is benchmarked by default.
-# crate-type = ["rlib"] # The crate types to generate.
+# crate-type = ["bin"]  # The crate types to generate.
 # doc = true            # Is documented by default.
 # doctest = true        # Documentation examples are tested by default.
 # edition = "2018"      # The edition of the target.
 # harness = true        # Use libtest harness.
 name = "fip_api"        # The name of the target.
 path = "src/main.rs"    # The source file of the target.
-# plugin = false        # Used as a compiler plugin (deprecated).
 # proc-macro = false    # Set to `true` for a proc-macro library.
 required-features = []  # Features required to build this target (N/A for lib).
 # test = true           # Is tested by default.
 
+# [[example]]
+
+# [[test]]
+
+# [badges]
+
 [build-dependencies]
-tonic-build = { default-features = false, version = "0.5.0" }
+tonic-build = { default-features = false, version = "0.5.1" }
 
 [dependencies]
-anyhow = { default-features = false, features = ["std"], version = "1.0.41" }
+anyhow = { default-features = false, features = ["std"], version = "1.0.42" }
 dotenv = { default-features = false, version = "0.15.0" }
 envy = { default-features = false, version = "0.4.2" }
 fip_common = { default-features = false, path = "../fip_common", version = "0.1.0" }
-opentelemetry = { default-features = false, features = ["rt-tokio"], version = "0.14.0" }
-# opentelemetry-jaeger = { default-features = false, features = ["tokio"], version = "0.13.0" }
-opentelemetry-zipkin = { default-features = false, features = ["reqwest-client"], version = "0.12.0" }
+opentelemetry = { default-features = false, features = ["rt-tokio"], version = "0.15.0" }
+# opentelemetry-jaeger = { default-features = false, features = ["tokio"], version = "0.14.0" }
+opentelemetry-zipkin = { default-features = false, features = ["reqwest-client"], version = "0.13.0" }
 prost = { default-features = false, version = "0.8.0" }
 serde = { default-features = false, features = ["derive"], version = "1.0.126" }
-tokio = { default-features = false, features = ["macros", "rt-multi-thread", "time"], version = "1.8.1" }
+tokio = { default-features = false, features = ["macros", "rt-multi-thread", "time"], version = "1.9.0" }
 tonic = { default-features = false, features = ["transport"], version = "0.5.0" }
 tonic-health = { default-features = false, features = ["transport"], version = "0.4.0" }
 tracing = { default-features = false, version = "0.1.26" }
 tracing-appender = { default-features = false, version = "0.1.2" }
 tracing-bunyan-formatter = { default-features = false, version = "0.2.4" }
 tracing-error = { default-features = false, version = "0.1.2" }
-tracing-opentelemetry = { default-features = false, features = ["tracing-log"], version = "0.13.0" }
-tracing-subscriber = { default-features = false, features = ["env-filter"], version = "0.2.19" }
+tracing-opentelemetry = { default-features = false, features = ["tracing-log"], version = "0.14.0" }
+tracing-subscriber = { default-features = false, features = ["env-filter", "fmt"], version = "0.2.19" }
 
 [dev-dependencies]
 cargo-husky = { default-features = false, features = ["user-hooks"], version = "1.5.0" }
-# mockall = { default-features = false, features = ["user-hooks"], version = "0.10.1" }
+# mockall = { default-features = false, features = ["user-hooks"], version = "0.10.2" }
 
-[features]
-default = []
-attributes = []
+# [features]
 
 [package]
 authors = ["Hossein Mayboudi <smhmayboudi@gmail.com>"]
 categories = ["network-programming"]
-# default-run = "default-run"
 description = "fip_api"
 edition = "2018"
 homepage = ""
-include = ["src/**/*", "proto/*", "build.rs"]
-keywords = ["fpi", "api"]
+include = [
+    "src/**/*",
+    "proto/*",
+    "build.rs",
+]
+keywords = [
+    "fpi",
+    "api",
+]
 license = "MIT"
 name = "fip_api"
 publish = false
 repository = "https://github.com/smhmayboudi/fip"
 version = "0.1.0"
+
+# [profile]
+
+# [patch]
+
+# [replace]
+
+# [workspace]

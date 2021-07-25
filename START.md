@@ -56,7 +56,7 @@ $ cargo generate-lockfile
 $ cargo init
 
 $ cargo install --list
-# $ cargo install \
+# $ cargo install --locked \
 #     cargo-audit \
 #     cargo-benchcmp \
 #     cargo-expand \

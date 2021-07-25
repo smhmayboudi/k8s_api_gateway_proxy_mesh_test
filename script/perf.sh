@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 # STEP 0: Make sure there is no left-over profiling data from previous runs
 rm -rf /tmp/pgo-data

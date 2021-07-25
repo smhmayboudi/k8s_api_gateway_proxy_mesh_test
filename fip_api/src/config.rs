@@ -37,6 +37,12 @@ pub struct Config {
 }
 
 impl Config {
+    pub fn new() -> Self {
+        Self::default()
+    }
+}
+
+impl Config {
     pub fn app_name(&self) -> String {
         self.app_name.clone()
     }
