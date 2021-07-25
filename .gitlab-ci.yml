@@ -84,6 +84,6 @@ stages:
 - "dockerization"
 
 include:
-- local: "/fpi_api/.gitlab-ci.yml"
+- local: "/fip_api/.gitlab-ci.yml"
 
 # END actual pipeline definition
