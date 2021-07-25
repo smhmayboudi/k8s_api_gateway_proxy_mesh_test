@@ -43,7 +43,7 @@ edition = "2018"
 homepage = ""
 include = ["src/**/*"]
 keywords = [
-    "fpi",
+    "fip",
     "common",
 ]
 license = "MIT"

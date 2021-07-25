@@ -300,7 +300,7 @@ rustc --print target-list
 rustc --target=${TRIPLE} --print target-cpus
 rustc --target=${TRIPLE} --print target-features
 
-perf record --call-graph=dwarf ./target/release/fpi_api
+perf record --call-graph=dwarf ./target/release/fip_api
 perf report --hierarchy -M intel
 
 $ RUSTFLAGS="-C target-cpu=native" cargo build --release

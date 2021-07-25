@@ -60,7 +60,7 @@ include = [
     "build.rs",
 ]
 keywords = [
-    "fpi",
+    "fip",
     "api",
 ]
 license = "MIT"
