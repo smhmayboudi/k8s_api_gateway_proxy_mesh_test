@@ -1,17 +1,7 @@
 #!/bin/bash
 set -eu
 
-echo '+cargo add clippy'
-rustup component add clippy
-
-echo '+cargo clippy'
-cargo clippy --all-features --all-targets -- -D warnings
-
-echo '+cargo add rustfmt'
-rustup component add rustfmt
-
-echo '+cargo fmt'
-cargo fmt -- --check
+make clippy fmt-check
 
 IFS='
 '

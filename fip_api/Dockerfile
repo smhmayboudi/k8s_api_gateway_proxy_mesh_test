@@ -4,7 +4,7 @@ ENV LINKERD_AWAIT_VERSION=${LINKERD_AWAIT_VERSION}
 RUN curl -sSLo /tmp/linkerd-await https://github.com/linkerd/linkerd-await/releases/download/release%2F${LINKERD_AWAIT_VERSION}/linkerd-await-${LINKERD_AWAIT_VERSION}-amd64 && \
     chmod 755 /tmp/linkerd-await
 
-FROM rust:1.53.0 as builder
+FROM rust:1.53.0-buster as builder
 WORKDIR /fip
 ADD . .
 RUN rustup component add rustfmt

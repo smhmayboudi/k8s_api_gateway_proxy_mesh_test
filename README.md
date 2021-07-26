@@ -232,7 +232,7 @@ $ docker pull debian:stable-slim
 $ docker pull jaegertracing/all-in-one:1.23.0
 $ docker pull materialize/materialized:v0.8.0
 $ docker pull registry:2.7.1
-$ docker pull rust:1.53.0
+$ docker pull rust:1.53.0-buster
 $ docker pull timberio/vector:0.14.X-distroless-static
 $ docker pull vectorized/redpanda:v21.6.2
 ```
