@@ -4,7 +4,7 @@ default:
   cache:
     key: "${CI_PROJECT_PATH_SLUG}"
     paths:
-    - "/vendor"
+    - "vendor"
   image: "rust:1.53.0-buster"
 
 .default-rule: &default-rule
