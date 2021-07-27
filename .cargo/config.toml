@@ -86,11 +86,11 @@ rustdocflags = [
 
 # [registry]
 
-# [source.crates-io]
-# replace-with = "vendored-sources"
+[source.crates-io]
+replace-with = "vendored-sources"
 
-# [source.vendored-sources]
-# directory = "vendor"
+[source.vendored-sources]
+directory = "vendor"
 
 # [target.<cfg>]
 
