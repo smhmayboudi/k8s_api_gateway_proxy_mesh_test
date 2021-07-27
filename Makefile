@@ -1,4 +1,5 @@
 # ARCH
+# BIN
 # CARGO
 # CARGO_RELEASE
 # CARGO_TARGET
@@ -7,6 +8,7 @@
 # RUSTUP
 # STRIP
 
+BIN ?= fip_api
 RUSTUP ?= rustup
 CARGO_TARGET ?= $(shell $(RUSTUP) show |sed -n 's/^Default host: \(.*\)/\1/p')
 TARGET_DIR = target/$(CARGO_TARGET)/debug
@@ -14,23 +16,23 @@ ifdef CARGO_RELEASE
 	RELEASE = --release
 	TARGET_DIR = target/$(CARGO_TARGET)/release
 endif
-TARGET_BIN = $(TARGET_DIR)/linkerd-await
+TARGET_BIN = $(TARGET_DIR)/$(BIN)
 
 ARCH ?= x86_64
 OS ?= macos
 PACKAGE_VERSION ?= latest
 STRIP ?= strip
 
-PKG_ROOT = $(TARGET)/package
-PKG_NAME = linkerd-await-$(PACKAGE_VERSION)-$(ARCH)
-PKG_BASE = $(PKG_ROOT)/$(PKG_NAME)
+PACKAGE_ROOT = $(TARGET)/package
+PACKAGE_NAME = $(BIN)-$(PACKAGE_VERSION)-$(ARCH)
+PACKAGE_BASE = $(PACKAGE_ROOT)/$(PACKAGE_NAME)
 
 SHASUM = shasum -a 256
 
 CARGO ?= cargo
 CARGO_AUDIT = $(CARGO) audit --target-arch $(ARCH) --target-os $(OS)
-CARGO_BUILD = $(CARGO) build --all-features --frozen --no-default-features --target=$(CARGO_TARGET) $(RELEASE)
-CARGO_CHECK = $(CARGO) check --all-features --frozen --no-default-features --target=$(CARGO_TARGET) $(RELEASE) --workspace
+CARGO_BUILD = $(CARGO) build --all-features --frozen --no-default-features $(RELEASE) --target=$(CARGO_TARGET)
+CARGO_CHECK = $(CARGO) check --all-features --frozen --no-default-features $(RELEASE) --target=$(CARGO_TARGET) --workspace
 CARGO_CLIPPY = $(CARGO) clippy --all-features --all-targets -- -D warnings
 CARGO_FMT = $(CARGO) fmt --all
 CARGO_TEST = $(CARGO) test --all-features --frozen --no-default-features --target=$(CARGO_TARGET) $(RELEASE) --workspace
@@ -92,9 +94,9 @@ fmt-check: add-fmt
 .PHONY: release
 release: $(TARGET_BIN)
 	@mkdir -p release
-	cp $(TARGET_BIN) release/$(PKG_NAME)
-	$(STRIP) release/$(PKG_NAME)
-	$(SHASUM) release/$(PKG_NAME) > release/$(PKG_NAME).shasum
+	cp $(TARGET_BIN) release/$(PACKAGE_NAME)
+	$(STRIP) release/$(PACKAGE_NAME)
+	$(SHASUM) release/$(PACKAGE_NAME) > release/$(PACKAGE_NAME).shasum
 
 .PHONY: test
 test: 

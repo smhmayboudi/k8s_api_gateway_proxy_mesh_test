@@ -4,7 +4,7 @@ default:
   cache:
     key: "${CI_PROJECT_PATH_SLUG}"
     paths:
-    - "vendor"
+    - "/vendor"
   image: "rust:1.53.0-buster"
 
 .default-rule: &default-rule
@@ -15,10 +15,10 @@ default:
   extends:
   - ".default-rule"
   script:
-  - "cargo vendor"
-  - "cargo build --package $PACKAGE_NAME"
-  # - "make vendor"
-  # - "make release"
+  # - "cargo vendor"
+  # - "cargo build --package $PACKAGE_NAME"
+  - "make vendor"
+  - "make release"
   stage: "build"
   when: "manual"
 
@@ -31,10 +31,10 @@ default:
   extends:
   - ".default-rule"
   script:
-  - "cargo vendor"
-  - "cargo test --package $PACKAGE_NAME"
-  # - "make vendor"
-  # - "make test"
+  # - "cargo vendor"
+  # - "cargo test --package $PACKAGE_NAME"
+  - "make vendor"
+  - "make test"
   stage: "test"
   when: "manual"
 
