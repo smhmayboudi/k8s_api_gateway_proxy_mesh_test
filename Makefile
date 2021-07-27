@@ -30,13 +30,13 @@ PACKAGE_BASE = $(PACKAGE_ROOT)/$(PACKAGE_NAME)
 SHASUM = shasum -a 256
 
 CARGO ?= cargo
-CARGO_AUDIT = $(CARGO) audit --target-arch $(ARCH) --target-os $(OS)
+CARGO_AUDIT = $(CARGO) audit --target-arch=$(ARCH) --target-os=$(OS)
 CARGO_BUILD = $(CARGO) build --all-features --frozen --no-default-features $(RELEASE) --target=$(CARGO_TARGET)
 CARGO_CHECK = $(CARGO) check --all-features --frozen --no-default-features $(RELEASE) --target=$(CARGO_TARGET) --workspace
 CARGO_CLIPPY = $(CARGO) clippy --all-features --all-targets -- -D warnings
 CARGO_FMT = $(CARGO) fmt --all
-CARGO_TEST = $(CARGO) test --all-features --frozen --no-default-features --target=$(CARGO_TARGET) $(RELEASE) --workspace
-CARGO_VENDOR = $(CARGO) vendor
+CARGO_TEST = $(CARGO) test --all-features --frozen --no-default-features $(RELEASE) --target=$(CARGO_TARGET) --workspace
+CARGO_VENDOR = $(CARGO) vendor --frozen
 
 $(TARGET_BIN): add-target fetch
 	$(CARGO_BUILD)
