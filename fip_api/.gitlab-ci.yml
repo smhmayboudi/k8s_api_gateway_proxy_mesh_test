@@ -22,8 +22,8 @@ test:fip_api:
   extends:
   - ".test"
   - ".fip_api"
-  # needs:
-  # - "build:fip_api"
+  needs:
+  - "build:fip_api"
 
 coverage:fip_api:
   dependencies:
@@ -31,14 +31,14 @@ coverage:fip_api:
   extends:
   - ".coverage"
   - ".fip_api"
-  # needs:
-  # - "test:fip_api"
+  needs:
+  - "test:fip_api"
 
 deploy:fip_api:
   extends:
   - ".deploy"
   - ".fip_api"
-  # needs:
-  # - "test:fip_api"
+  needs:
+  - "test:fip_api"
 
 # END actual pipeline definition

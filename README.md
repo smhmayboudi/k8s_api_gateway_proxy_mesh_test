@@ -231,13 +231,16 @@ $ linkerd -n fip-api-namespace viz stat deployment
 # Docker
 
 ```bash
-$ docker pull debian:stable-slim
-$ docker pull jaegertracing/all-in-one:1.23.0
-$ docker pull materialize/materialized:v0.8.0
+$ docker pull curlimages/curl:7.78.0
+$ docker pull gcr.io/distroless/cc:nonroot
+$ docker pull jaegertracing/all-in-one:1.24.0
+$ docker pull materialize/materialized:v0.8.3
+$ docker pull mcr.microsoft.com/vscode/devcontainers/rust:0-1
+$ docker pull openzipkin/zipkin:2.23.2
 $ docker pull registry:2.7.1
 $ docker pull rust:1.53.0-buster
-$ docker pull timberio/vector:0.14.X-distroless-static
-$ docker pull vectorized/redpanda:v21.6.2
+$ docker pull timberio/vector:0.15.0-distroless-static
+$ docker pull vectorized/redpanda:v21.7.6
 ```
 
 # Docker Content Trust
