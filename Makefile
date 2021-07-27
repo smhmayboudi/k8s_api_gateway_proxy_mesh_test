@@ -36,7 +36,7 @@ CARGO_CHECK = $(CARGO) check --all-features --frozen --no-default-features $(REL
 CARGO_CLIPPY = $(CARGO) clippy --all-features --all-targets -- -D warnings
 CARGO_FMT = $(CARGO) fmt --all
 CARGO_TEST = $(CARGO) test --all-features --frozen --no-default-features --target=$(CARGO_TARGET) $(RELEASE) --workspace
-CARGO_VENDOR = $(CARGO) vendor --frozen
+CARGO_VENDOR = $(CARGO) vendor
 
 $(TARGET_BIN): add-target fetch
 	$(CARGO_BUILD)
