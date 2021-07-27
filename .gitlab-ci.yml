@@ -17,7 +17,9 @@ default:
   script:
   # - "cargo vendor"
   # - "cargo build --package $PACKAGE_NAME"
-  - "make add-fmt vendor release"
+  - "make add-fmt"
+  - "ls -al vendor"
+  - "make vendor release"
   stage: "build"
   when: "manual"
 
