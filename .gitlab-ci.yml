@@ -16,19 +16,23 @@ default:
   - ".default-rule"
   script:
   - "cargo build --package $PACKAGE_NAME"
+  # - "make vendor"
+  # - "make release"
   stage: "build"
   when: "manual"
 
 .test: &test
   artifacts:
-    when: "always"
+    expire_in: "7 days"
     paths:
     - "coverage"
-    expire_in: "7 days"
+    when: "always"
   extends:
   - ".default-rule"
   script:
   - "cargo test --package $PACKAGE_NAME"
+  # - "make vendor"
+  # - "make test"
   stage: "test"
   when: "manual"
 
@@ -40,13 +44,13 @@ default:
   extends:
   - ".default-rule"
   script:
-  - "rm -rf public/$PACKAGE_NAME/*"
+  - "rm -rf public/$PACKAGE_NAME"
   - "mkdir -p public/$PACKAGE_NAME"
-  - "cp -r coverage/lcov-report/* public/$PACKAGE_NAME/"
+  - "cp -r coverage/lcov-report/* public/$PACKAGE_NAME"
   stage: "coverage"
   when: "manual"
 
-.dockerization: &dockerization
+.deploy: &deploy
   extends:
     - ".default-rule"
   image: "docker:20.10.7"
@@ -56,14 +60,16 @@ default:
   - "docker build --cache-from $CI_REGISTRY_IMAGE/$IMAGE_NAME:latest -f $DOCKERFILE --tag $CI_REGISTRY_IMAGE/$IMAGE_NAME:$CI_COMMIT_SHA --tag $CI_REGISTRY_IMAGE/$IMAGE_NAME:latest ."
   - "docker push $CI_REGISTRY_IMAGE/$IMAGE_NAME:$CI_COMMIT_SHA"
   - "docker push $CI_REGISTRY_IMAGE/$IMAGE_NAME:latest"
-  # - "docker run -v '$MOUNT_POINT:/mnt' $IMAGE_NAME /mnt/script/to/run/tests"
+  # - "mkdir -p '$MOUNT_POINT'"
+  # - "docker run -v "$MOUNT_POINT:/mnt" $IMAGE_NAME /mnt/script/to/run/tests""
   services:
   - "docker:20.10.7-dind-rootlesss"
-  stage: "dockerization"
+  stage: "deploy"
   variables:
     DOCKER_DRIVER: "overlay2"
-    DOCKER_HOST: "tcp://127.0.0.1:2375"
+    DOCKER_HOST: "tcp://127.0.0.1:2376"
     DOCKER_TLS_CERTDIR: ""
+    # MOUNT_POINT: /builds/$CI_PROJECT_PATH/mnt
     # MOUNT_POINT: "$CI_PROJECT_DIR/mnt"
   when: "manual"
 
@@ -79,7 +85,7 @@ stages:
 - "build"
 - "test"
 - "coverage"
-- "dockerization"
+- "deploy"
 
 include:
 - local: "/fip_api/.gitlab-ci.yml"

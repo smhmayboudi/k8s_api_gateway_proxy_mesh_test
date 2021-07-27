@@ -34,6 +34,10 @@ CARGO_CHECK = $(CARGO) check --all-features --frozen --no-default-features --tar
 CARGO_CLIPPY = $(CARGO) clippy --all-features --all-targets -- -D warnings
 CARGO_FMT = $(CARGO) fmt --all
 CARGO_TEST = $(CARGO) test --all-features --frozen --no-default-features --target=$(CARGO_TARGET) $(RELEASE) --workspace
+CARGO_VENDOR = $(CARGO) vendor --frozen
+
+$(TARGET_BIN): add-target fetch
+	$(CARGO_BUILD)
 
 .PHONY: add-audit
 add-audit:
@@ -47,6 +51,10 @@ add-clippy:
 add-fmt:
 	$(RUSTUP) component add rustfmt
 
+.PHONY: add-target
+add-target:
+	$(RUSTUP) target add $(CARGO_TARGET)
+
 .PHONY: all
 all: fmt-check check
 
@@ -58,7 +66,7 @@ audit:
 build: $(TARGET_BIN)
 
 .PHONY: check
-check: configure-target fetch
+check: add-target fetch
 	$(CARGO_CHECK)
 
 .PHONY: clean
@@ -69,15 +77,9 @@ clean:
 clippy: add-clippy
 	$(CARGO_CLIPPY)
 
-.PHONY: configure-target
-configure-target:
-	$(RUSTUP) target add $(CARGO_TARGET)
-
 .PHONY: fetch
 fetch: Cargo.lock
 	$(CARGO) fetch --locked
-$(TARGET_BIN): fetch configure-target
-	$(CARGO_BUILD)
 
 .PHONY: fmt
 fmt: add-fmt
@@ -87,13 +89,17 @@ fmt: add-fmt
 fmt-check: add-fmt
 	$(CARGO_FMT) -- --check
 
-.PHONY: test
-test: 
-	$(CARGO_TEST)
-
 .PHONY: release
 release: $(TARGET_BIN)
 	@mkdir -p release
 	cp $(TARGET_BIN) release/$(PKG_NAME)
 	$(STRIP) release/$(PKG_NAME)
 	$(SHASUM) release/$(PKG_NAME) > release/$(PKG_NAME).shasum
+
+.PHONY: test
+test: 
+	$(CARGO_TEST)
+
+.PHONY: vendor
+vendor: 
+	$(CARGO_VENDOR)

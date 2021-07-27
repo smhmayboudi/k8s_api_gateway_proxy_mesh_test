@@ -1,3 +1,5 @@
+[![Build Status](__badge_image__)](__badge_url__)
+
 # SSH Key
 
 ```bash
@@ -88,6 +90,7 @@ $ cargo vendor
 
 ```bash
 $ cargo install --locked \
+    bunyan \
     critcmp \
     flamegraph \
     grcov \
