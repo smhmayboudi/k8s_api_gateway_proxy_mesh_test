@@ -38,7 +38,7 @@ CARGO_FMT = $(CARGO) fmt --all
 CARGO_TEST = $(CARGO) test --all-features --frozen --no-default-features --target=$(CARGO_TARGET) $(RELEASE) --workspace
 CARGO_VENDOR = $(CARGO) vendor
 
-$(TARGET_BIN): add-target fetch
+$(TARGET_BIN): add-fmt add-target fetch
 	$(CARGO_BUILD)
 
 .PHONY: add-audit
