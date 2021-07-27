@@ -4,10 +4,10 @@
   variables:
     BIN: "fip_api"
     IMAGE_NAME: "fip-api-service"
-    DOCKERFILE: "./fip_api/Dockerfile"
+    DOCKERFILE: "fip_api/Dockerfile"
   only:
     changes:
-    - "./fip_api/**/*"
+    - "fip_api/**/*"
 
 # END project-specific configuration
 

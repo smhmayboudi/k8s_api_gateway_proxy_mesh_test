@@ -4,7 +4,7 @@ default:
   cache:
     key: "${CI_PROJECT_PATH_SLUG}"
     paths:
-    - "./vendor"
+    - "vendor"
   image: "rust:1.53.0-buster"
 
 .default-rule: &default-rule
@@ -18,7 +18,7 @@ default:
   # - "cargo vendor"
   # - "cargo build --package $PACKAGE_NAME"
   - "make vendor"
-  - ls -al ./vendor
+  - ls -al vendor
   - "make release"
   stage: "build"
   when: "manual"
@@ -43,13 +43,13 @@ default:
   artifacts:
     expire_in: "7 days"
     paths:
-    - "./public/$PACKAGE_NAME"
+    - "public/$PACKAGE_NAME"
   extends:
   - ".default-rule"
   script:
-  - "rm -rf ./public/$PACKAGE_NAME"
-  - "mkdir -p ./public/$PACKAGE_NAME"
-  - "cp -r ./coverage/lcov-report/* ./public/$PACKAGE_NAME"
+  - "rm -rf public/$PACKAGE_NAME"
+  - "mkdir -p public/$PACKAGE_NAME"
+  - "cp -r coverage/lcov-report/* public/$PACKAGE_NAME"
   stage: "coverage"
   when: "manual"
 
@@ -91,6 +91,6 @@ stages:
 - "deploy"
 
 include:
-- local: "./fip_api/.gitlab-ci.yml"
+- local: "fip_api/.gitlab-ci.yml"
 
 # END actual pipeline definition
