@@ -83,7 +83,7 @@ clippy: add-clippy
 	$(CARGO_CLIPPY)
 
 .PHONY: fetch
-fetch: Cargo.lock
+fetch: Cargo.lock vendor
 	$(CARGO) fetch --locked
 
 .PHONY: fmt
