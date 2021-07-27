@@ -36,7 +36,10 @@ CARGO_CHECK = $(CARGO) check --all-features --frozen --no-default-features $(REL
 CARGO_CLIPPY = $(CARGO) clippy --all-features --all-targets -- -D warnings
 CARGO_FMT = $(CARGO) fmt --all
 CARGO_TEST = $(CARGO) test --all-features --frozen --no-default-features $(RELEASE) --target=$(CARGO_TARGET) --workspace
-CARGO_VENDOR = $(CARGO) vendor --frozen
+CARGO_VENDOR = $(CARGO) vendor --quiet
+
+# VENDOR := $(shell ./script/exists.sh vendor)
+
 
 $(TARGET_BIN): add-target fetch
 	$(CARGO_BUILD)
@@ -99,9 +102,9 @@ release: $(TARGET_BIN)
 	$(SHASUM) release/$(PACKAGE_NAME) > release/$(PACKAGE_NAME).shasum
 
 .PHONY: test
-test: 
+test:
 	$(CARGO_TEST)
 
 .PHONY: vendor
-vendor: 
-	$(CARGO_VENDOR)
+vendor:
+	$(shell if [ ! -d "vendor" ]; then $(CARGO_VENDOR); fi; echo true;)
