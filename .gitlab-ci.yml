@@ -17,8 +17,8 @@ default:
   script:
   # - "cargo vendor"
   # - "cargo build --package $PACKAGE_NAME"
-  - ls -alR
-  - ls -alR /
+  - ls -al
+  - ls -al /
   - "make vendor"
   - "make release"
   stage: "build"
