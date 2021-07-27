@@ -10,6 +10,7 @@ ADD . .
 RUN rustup component add rustfmt
 # RUN mkdir .cargo
 # RUN RUN cargo vendor > .cargo/config
+RUN vendor
 RUN cargo build --release --package fip_api
 
 FROM gcr.io/distroless/cc:nonroot

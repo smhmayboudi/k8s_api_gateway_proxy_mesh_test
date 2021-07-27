@@ -15,6 +15,7 @@ default:
   extends:
   - ".default-rule"
   script:
+  - "cargo vendor"
   - "cargo build --package $PACKAGE_NAME"
   # - "make vendor"
   # - "make release"
@@ -30,6 +31,7 @@ default:
   extends:
   - ".default-rule"
   script:
+  - "cargo vendor"
   - "cargo test --package $PACKAGE_NAME"
   # - "make vendor"
   # - "make test"
