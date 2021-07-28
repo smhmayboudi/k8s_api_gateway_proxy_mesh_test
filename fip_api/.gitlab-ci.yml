@@ -2,9 +2,9 @@
 
 .fip_api: &fip_api
   variables:
-    BIN: "fip_api"
-    IMAGE_NAME: "fip-api-service"
     DOCKERFILE: "fip_api/Dockerfile"
+    IMAGE_NAME: "fip-api"
+    PACKAGE: "fip_api"
   only:
     changes:
     - "fip_api/**/*"

@@ -23,8 +23,6 @@ RUN apt-get update && \
 # RUN cargo install cross
 ADD . .
 RUN rustup component add rustfmt
-# RUN mkdir .cargo
-# RUN RUN cargo vendor > .cargo/config
 RUN cargo build --package fip_api --release --target=x86_64-unknown-linux-musl
 
 FROM scratch

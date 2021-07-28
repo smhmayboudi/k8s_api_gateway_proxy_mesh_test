@@ -12,14 +12,17 @@ jobs:
         architecture: [amd64, arm64, arm]
         include:
           - architecture: amd64
-            target: x86_64-unknown-linux-musl
+            os: linux
             strip: strip
+            target: x86_64-unknown-linux-musl
           - architecture: arm64
-            target: aarch64-unknown-linux-musl
+            os: linux
             strip: aarch64-linux-gnu-strip
+            target: aarch64-unknown-linux-musl
           - architecture: arm
-            target: armv7-unknown-linux-musleabihf
+            os: linux
             strip: arm-linux-gnueabihf-strip
+            target: armv7-unknown-linux-musleabihf
     name: Package (${{ matrix.architecture }})
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -36,14 +39,15 @@ jobs:
 
       - name: package
         env:
-          CARGO: cross
-          CARGO_RELEASE: "1"
-          CROSS_DOCKER_IN_DOCKER: true
-          PACKAGE_VERSION: ${{ steps.release-tag-meta.outputs.name }}
-          CARGO_TARGET: ${{ matrix.target }}
-          STRIP: ${{ matrix.strip }}
           ARCH: ${{ matrix.architecture }}
+          CARGO: cross
+          OS: ${{ matrix.os }}
+          CROSS_DOCKER_IN_DOCKER: true
+          RELEASE: "--release"
           RUST_BACKTRACE: 1
+          STRIP: ${{ matrix.strip }}
+          TARGET: ${{ matrix.target }}
+          VERSION: ${{ steps.release-tag-meta.outputs.name }}
         uses: ./.github/actions/package
         with:
           entrypoint: make

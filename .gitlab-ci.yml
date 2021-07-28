@@ -4,7 +4,7 @@ default:
   cache:
     key: "${CI_PROJECT_PATH_SLUG}"
     paths:
-    - "vendor"
+    - "/usr/local/cargo/registry"
   image: "rust:1.53.0-buster"
 
 .default-rule: &default-rule
@@ -36,13 +36,13 @@ default:
   artifacts:
     expire_in: "7 days"
     paths:
-    - "public/$PACKAGE_NAME"
+    - "public/$PACKAGE"
   extends:
   - ".default-rule"
   script:
-  - "rm -rf public/$PACKAGE_NAME"
-  - "mkdir -p public/$PACKAGE_NAME"
-  - "cp -r coverage/lcov-report/* public/$PACKAGE_NAME"
+  - "rm -rf public/$PACKAGE"
+  - "mkdir -p public/$PACKAGE"
+  - "cp -r coverage/lcov-report/* public/$PACKAGE"
   stage: "coverage"
   when: "manual"
 

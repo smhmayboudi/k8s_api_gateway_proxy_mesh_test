@@ -1,4 +1,4 @@
-vendor/
+release/
 
 # Created by https://www.toptal.com/developers/gitignore/api/macos,rust,osx,visualstudiocode,vscodev
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,rust,osx,visualstudiocode,vscodev

@@ -11,7 +11,7 @@ jobs:
       image: docker://rust:1.53.0-buster
     steps:
       - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
-      - run: make check-fmt check
+      - run: make check fmt-check
 
   audit:
     timeout-minutes: 5

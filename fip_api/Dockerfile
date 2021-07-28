@@ -8,9 +8,7 @@ FROM rust:1.53.0-buster as builder
 WORKDIR /fip
 ADD . .
 RUN rustup component add rustfmt
-# RUN mkdir .cargo
-# RUN RUN cargo vendor > .cargo/config
-RUN vendor
+RUN cargo vendor
 RUN cargo build --release --package fip_api
 
 FROM gcr.io/distroless/cc:nonroot

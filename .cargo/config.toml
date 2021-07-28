@@ -86,28 +86,11 @@ rustdocflags = [
 
 # [registry]
 
-[source.crates-io]
-replace-with = "vendored-sources"
-
-[source.vendored-sources]
-directory = "vendor"
+# [source.<name>]
 
 # [target.<cfg>]
 
-# [target.aarch64-unknown-linux-musl]
-# linker = "lld"
-# runner = ""
-# rustflags = []
-
-# [target.armv7-unknown-linux-muslleabihf]
-# linker = "lld"
-# runner = ""
-# rustflags = []
-
-# [target.x86_64-unknown-linux-musl]
-# linker = "lld"
-# runner = ""
-# rustflags = []
+# [target.<triple>]
 
 # [target.<triple>.<links>]
 
