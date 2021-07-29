@@ -15,7 +15,7 @@ default:
   extends:
   - ".default-rule"
   script:
-  - "make add-fmt release"
+  - "make release"
   stage: "build"
   when: "manual"
 
