@@ -1,5 +1,4 @@
 #!/bin/bash
 set -e
 
-make check test audit
-
+make audit deny-check check test

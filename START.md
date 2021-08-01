@@ -1,13 +1,13 @@
 # RUSTUP
 
-```bash
-$ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```sh
+$ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 # از حالت پیش فرض نصب استفاده نمایید بخاطر اینکه یکسریی از کامپوننت ها در ورژن های راست موجود نیست.
 
 $ rustup show
 
-$ rustup update &&\
-  rustup self update &&\
+$ rustup update && \
+  rustup self update && \
   rustup update nightly
 
 $ rustup default
@@ -41,7 +41,7 @@ $ rustup man
 
 # CREATE
 
-```bash
+```sh
 $ cargo --list
 $ cargo -Z help
 
@@ -88,7 +88,7 @@ $ cargo vendor
 
 # PROJECT
 
-```bash
+```sh
 $ cargo new --bin rust_bin_test
 $ cargo new --lib rust_lib_test
 

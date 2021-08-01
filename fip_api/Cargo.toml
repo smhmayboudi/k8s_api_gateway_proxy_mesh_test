@@ -66,7 +66,7 @@ keywords = [
 license = "MIT"
 name = "fip_api"
 publish = false
-repository = "https://github.com/smhmayboudi/fip"
+repository = "https://github.com/smhmayboudi/k8s_api_gateway_proxy_mesh_test"
 version = "0.1.0"
 
 # [profile]

@@ -1,21 +1,18 @@
-# ARCH
+.DEFAULT_GOAL := help
+
 # CARGO
-# OS
 # PACKAGE
 # RELEASE
 # STRIP
 # TARGET
 # VERSION
 
-ARCH ?= x86_64
 CARGO ?= cargo
-OS ?= macos
 PACKAGE ?= fip_api
-# RELEASE ?=
-RUSTUP ?= rustup
+# RELEASE ?= --release
 STRIP ?= strip
-TARGET ?= $(shell $(RUSTUP) show |sed -n 's/^Default host: \(.*\)/\1/p')
-VERSION ?= 0.1.0
+TARGET ?= $(shell rustup show | sed -n 's/^Default host: \(.*\)/\1/p')
+VERSION ?= v0.1.0
 
 TARGET_DIR = target/$(TARGET)/debug
 ifdef RELEASE
@@ -25,10 +22,8 @@ endif
 BIN = $(TARGET_DIR)/$(PACKAGE)
 
 # PACKAGE_ROOT = $(__TARGET__)/package
-BIN_NAME = $(PACKAGE)-$(VERSION)-$(ARCH)
+BIN_NAME = $(PACKAGE)-$(VERSION)-$(TARGET)
 # PACKAGE_BASE = $(PACKAGE_ROOT)/$(BIN_NAME)
-
-SHASUM = shasum -a 256
 
 CARGO_BENCH = $(CARGO) bench --all-features --frozen --no-default-features --package $(PACKAGE) --target $(TARGET) #--target-dir $(TARGET_DIR)
 CARGO_BUILD = $(CARGO) build --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET) #--target-dir $(TARGET_DIR)
@@ -40,7 +35,7 @@ CARGO_FIX = $(CARGO) fix --all-features --frozen --no-default-features --package
 CARGO_RUN = $(CARGO) run --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET) #--target-dir $(TARGET_DIR)
 CARGO_TEST = $(CARGO) test --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET) #--target-dir $(TARGET_DIR)
 
-CARGO_AUDIT = $(CARGO) audit --target-arch $(ARCH) --target-os $(OS)
+CARGO_AUDIT = $(CARGO) audit
 CARGO_CLIPPY = $(CARGO) clippy --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET) -- -D warnings #--target-dir $(TARGET_DIR)
 CARGO_DENY = $(CARGO) deny --all-features --no-default-features --target $(TARGET) --workspace
 CARGO_FMT = $(CARGO) fmt --package $(PACKAGE)
@@ -49,100 +44,101 @@ $(BIN): add-fmt add-target fetch
 	$(CARGO_BUILD)
 
 .PHONY: add-audit
-add-audit:
+add-audit: ## Add the audit
 	$(CARGO) install cargo-audit
 
 .PHONY: add-clippy
-add-clippy:
-	$(RUSTUP) component add clippy
+add-clippy: ## Add the clippy
+	rustup component add clippy
 
 .PHONY: add-deny
-add-deny:
+add-deny: ## Add the deny
 	$(CARGO) install cargo-deny
 
 .PHONY: add-fmt
-add-fmt:
-	$(RUSTUP) component add rustfmt
+add-fmt: ## Add the fmt
+	rustup component add rustfmt
 
 .PHONY: add-target
-add-target:
-	$(RUSTUP) target add $(TARGET)
+add-target: ## Add a target
+	rustup target add $(TARGET)
 
-.PHONY: all
-all: fmt-check check
+.PHONY: help
+help: ## Help
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 .PHONY: audit
-audit: add-audit
+audit: add-audit ## Audit
 	$(CARGO_AUDIT)
 
 .PHONY: bench
-bench: add-fmt add-target fetch
+bench: add-fmt add-target fetch ## Bench
 	$(CARGO_BENCH)
 
 .PHONY: build
-build: $(BIN)
+build: $(BIN) ## Build
 
 .PHONY: check
-check: add-fmt add-target fetch
+check: add-fmt add-target fetch ## Check
 	$(CARGO_CHECK)
 
 .PHONY: clean
-clean: add-target
+clean: add-target ## Clean
 	$(CARGO_CLEAN)
 
 .PHONY: clean-doc
-clean-doc: add-target
+clean-doc: add-target ## Clean doc
 	$(CARGO_CLEAN) --doc
 
 .PHONY: clippy
-clippy: add-clippy add-fmt fetch
+clippy: add-clippy add-fmt fetch  ## Clippy
 	$(CARGO_CLIPPY)
 
 .PHONY: deny-check
-deny-check: add-deny fetch
+deny-check: add-deny fetch ## Deny check
 	$(CARGO_DENY) check
 
 .PHONY: deny-fetch
-deny-fetch: add-deny fetch
+deny-fetch: add-deny fetch ## Deny fetch
 	$(CARGO_DENY) fetch
 
 .PHONY: deny-fix
-deny-fix: add-deny fetch
+deny-fix: add-deny fetch ## Deny fix
 	$(CARGO_DENY) fix
 
 .PHONY: doc
-doc: add-fmt add-target fetch
+doc: add-fmt add-target fetch ## Doc
 	$(CARGO_DOC)
 
 .PHONY: fetch
-fetch: Cargo.lock
+fetch: Cargo.lock ## Fetch
 	$(CARGO_FETCH)
 
 .PHONY: fix
-fix:
+fix: ## Fix
 	$(CARGO_FIX)
 
 .PHONY: run
-run:
+run: ## Run
 	$(CARGO_RUN)
 
 .PHONY: fmt
-fmt: add-fmt
+fmt: add-fmt ## FMT
 	$(CARGO_FMT)
 
 .PHONY: fmt-check
-fmt-check: add-fmt
+fmt-check: add-fmt ## FMT check
 	$(CARGO_FMT) -- --check
 
 .PHONY: release
-release: $(BIN)
+release: $(BIN) ## Release
 	@mkdir -p release
 	cp $(BIN) release/$(BIN_NAME)
 	$(STRIP) release/$(BIN_NAME)
-	$(SHASUM) release/$(BIN_NAME) > release/$(BIN_NAME).shasum
+	shasum -a 256 release/$(BIN_NAME) | cut -d " " -f 1  > release/$(BIN_NAME).sha256
 
 .PHONY: test
-test: add-fmt add-target fetch
+test: add-fmt add-target fetch ## Test
 	$(CARGO_TEST)
 
 
