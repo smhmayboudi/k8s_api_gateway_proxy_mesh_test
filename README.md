@@ -279,7 +279,7 @@ $ rustup target add \
     aarch64-unknown-linux-musl \
     armv7-unknown-linux-musleabihf \
     x86_64-unknown-linux-musl
-$ cargo build --package fip_api --release --target=x86_64-unknown-linux-musl
+$ cargo build --package fip_api --release --target x86_64-unknown-linux-musl
 
 $ docker build . -f ./fip_api/Dockerfile -t fip-api:0.1.0-nonroot
 $ docker run -e LINKERD_AWAIT_DISABLED=TRUE -i -p 8080:8080 --rm fip-api:0.1.0-nonroot
@@ -313,15 +313,17 @@ RUST_LIB_BACKTRACE=FULL
 RUST_LOG=INFO
 RUST_LOG_STYLE=NEVER
 
-# Tag the current commit
-GIT_COMMITTER_DATE=$(git log -n1 --pretty=%aD) git tag -a -m "Release 0.3.0" 0.3.0
-git push --tags
-
-rustc --print target-list
-rustc --target=${TRIPLE} --print target-cpus
-rustc --target=${TRIPLE} --print target-features
-
-perf record --call-graph=dwarf ./target/release/fip_api
-perf report --hierarchy -M intel
-
-$ RUSTFLAGS="-C target-cpu=native" cargo build --release
+# Scripts
+```sh
+$ GIT_COMMITTER_DATE=$(git log -n1 --pretty=%aD) git tag -a -m "Release 0.1.0" 0.1.0
+$ git push --tags
+$
+$ rustc --print target-list
+$ rustc --target ${TRIPLE} --print target-cpus
+$ rustc --target ${TRIPLE} --print target-features
+$
+$ perf record --call-graph=dwarf ./target/release/fip_api
+$ perf report --hierarchy -M intel
+$
+$ RUSTFLAGS="-Ctarget-cpu=native" cargo build --release
+```

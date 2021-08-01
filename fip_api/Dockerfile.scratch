@@ -23,7 +23,7 @@ RUN apt-get update && \
 WORKDIR /k8s_api_gateway_proxy_mesh_test
 ADD . .
 RUN rustup component add rustfmt
-RUN cargo build --package fip_api --release --target=x86_64-unknown-linux-musl
+RUN cargo build --package fip_api --release --target x86_64-unknown-linux-musl
 
 FROM scratch
 # COPY --from=linkerd /tmp/linkerd-await /linkerd-await
