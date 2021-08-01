@@ -3,9 +3,6 @@ set -eu
 
 make clippy fmt-check
 
-IFS='
-'
-echo '+git add'
 for LINE in `git diff --staged --name-status | grep .rs | grep -v 'D' | grep -v 'R'`; do
     FILE=(`echo $LINE | awk 'match($0, /.*/) {print $2}'`)
     git add $FILE
