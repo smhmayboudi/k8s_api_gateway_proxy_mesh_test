@@ -1,4 +1,3 @@
-ARG BASE_IMAGE=busybox:1.33.1-musl
-FROM $BASE_IMAGE
+FROM busybox:1.33.1-uclibc
 COPY entrypoint.sh /
 ENTRYPOINT ["/entrypoint.sh"]

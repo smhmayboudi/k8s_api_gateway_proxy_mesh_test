@@ -1,16 +1,20 @@
 .DEFAULT_GOAL := help
 
+# ARCH
 # CARGO
+# OS
 # PACKAGE
 # RELEASE
 # STRIP
 # TARGET
 # VERSION
 
+ARCH ?= x86_64 # aarch64, arm, asmjs, mips, mips64, msp430, nvptx64, powerpc, powerpc64, riscv, s390x, sparc, sparc64, thumbv6, thumbv7, wasm32, x86, x86_64, unknown
 CARGO ?= cargo
+OS ?= macos # android, cuda, dragonfly, emscripten, freebsd, fuchsia, haiku, hermit, illumos, ios, linux, macos, netbsd, openbsd, redox, solaris, tvos, wasi, windows, vxworks, unknown
 PACKAGE ?= fip_api
 # RELEASE ?= --release
-STRIP ?= strip
+STRIP ?= strip # strip, aarch64-linux-gnu-strip, arm-linux-gnueabihf-strip
 TARGET ?= $(shell rustup show | sed -n 's/^Default host: \(.*\)/\1/p')
 VERSION ?= v0.1.0
 
@@ -35,7 +39,7 @@ CARGO_FIX = $(CARGO) fix --all-features --frozen --no-default-features --package
 CARGO_RUN = $(CARGO) run --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET) #--target-dir $(TARGET_DIR)
 CARGO_TEST = $(CARGO) test --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET) #--target-dir $(TARGET_DIR)
 
-CARGO_AUDIT = $(CARGO) audit
+CARGO_AUDIT = $(CARGO) audit --target-arch $(ARCH) --target-os $(OS)
 CARGO_CLIPPY = $(CARGO) clippy --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET) -- -D warnings #--target-dir $(TARGET_DIR)
 CARGO_DENY = $(CARGO) deny --all-features --no-default-features --target $(TARGET) --workspace
 CARGO_FMT = $(CARGO) fmt --package $(PACKAGE)

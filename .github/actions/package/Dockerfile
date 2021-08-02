@@ -1,5 +1,4 @@
-ARG BASE_IMAGE=rust:1.54.0-buster
-FROM $BASE_IMAGE
+FROM rust:1.54.0-buster
 RUN apt-get update && \
     apt-get install -y \
         binutils-aarch64-linux-gnu \
@@ -14,6 +13,5 @@ RUN apt-get update && \
         /var/lib/apt/lists/* \
         /tmp/* \
         /var/tmp/
+ENV CROSS_DOCKER_IN_DOCKER=true
 RUN cargo install --locked cross
-
-WORKDIR /k8s_api_gateway_proxy_mesh_test

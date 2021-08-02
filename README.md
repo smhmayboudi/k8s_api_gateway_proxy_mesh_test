@@ -299,31 +299,20 @@ $ make release PACKAGE="fip_api" RELEASE="--release" TARGET="x86_64-unknown-linu
 $ make release CARGO="cross" PACKAGE="fip_api" RELEASE="--release" TARGET="x86_64-unknown-linux-musl" VERSION="$(git describe --tags --abbrev=0)"
 
 # 3rd WAY
-$ docker run -it -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd):/k8s_api_gateway_proxy_mesh_test --rm test sh
-$ make release CARGO="cross" PACKAGE="fip_api" RELEASE="--release" TARGET="x86_64-unknown-linux-musl" VERSION="0.1.0"
+$ docker run -v $(pwd):/project -v /var/run/docker.sock:/var/run/docker.sock -w /project --rm cross-build make release PACKAGE="fip_api" RELEASE="--release" TARGET="x86_64-unknown-linux-musl" VERSION="0.1.0"
 ```
-
-# WHICH CRATE ?
-
-CARGO_INCREMENTAL=0
-RUSTDOCFLAGS="-Cpanic=abort"
-RUSTFLAGS="-Zprofile -Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off -Zpanic_abort_tests -Cpanic=abort"
-RUST_BACKTRACE=FULL
-RUST_LIB_BACKTRACE=FULL
-RUST_LOG=INFO
-RUST_LOG_STYLE=NEVER
 
 # Scripts
 ```sh
 $ GIT_COMMITTER_DATE=$(git log -n1 --pretty=%aD) git tag -a -m "Release 0.1.0" 0.1.0
 $ git push --tags
-$
+
 $ rustc --print target-list
 $ rustc --target ${TRIPLE} --print target-cpus
 $ rustc --target ${TRIPLE} --print target-features
-$
+
 $ perf record --call-graph=dwarf ./target/release/fip_api
 $ perf report --hierarchy -M intel
-$
+
 $ RUSTFLAGS="-Ctarget-cpu=native" cargo build --release
 ```
