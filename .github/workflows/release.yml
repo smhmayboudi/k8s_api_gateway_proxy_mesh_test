@@ -1,6 +1,6 @@
 jobs:
   package:
-    name: Package (${{ matrix.arch }})
+    name: Package (${{ matrix.target }})
     runs-on: ubuntu-latest
     steps:
       - 
@@ -16,9 +16,7 @@ jobs:
       #   run: echo "${{ toJSON(steps.release-tag-meta) }}"
       - 
         env:
-          ARCH: ${{ matrix.arch }}
           CARGO: cross
-          OS: ${{ matrix.os }}
           PACKAGE: fip_api
           RELEASE: --release
           STRIP: ${{ matrix.strip }}
@@ -33,25 +31,19 @@ jobs:
         name: upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.arch }}-artifacts
+          name: ${{ matrix.target }}-artifacts
           path: release/*
     strategy:
       matrix:
-        arch: [aarch64, arm, x86_64]
+        target: [aarch64-unknown-linux-musl, x86_64-unknown-linux-musl, armv7-unknown-linux-musleabihf]
         include:
           - 
-            arch: aarch64
-            os: linux
             strip: aarch64-linux-gnu-strip
             target: aarch64-unknown-linux-musl
           - 
-            arch: x86_64
-            os: linux
             strip: strip
             target: x86_64-unknown-linux-musl
           -
-            arch: arm
-            os: linux
             strip: arm-linux-gnueabihf-strip
             target: armv7-unknown-linux-musleabihf
     timeout-minutes: 40

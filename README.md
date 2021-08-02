@@ -1,5 +1,10 @@
 [![Build Status](__badge_image__)](__badge_url__)
 
+[![coverage](https://shields.io/endpoint?url=https://sample.github.io/awesome/coverage.json)](https://sample.github.io/awesome/index.html)
+
+
+[![coverage](https://sample.github.io/awesome/badges/flat.svg)](https://sample.github.io/awesome/index.html)
+
 # SSH Key
 
 ```sh
@@ -220,9 +225,9 @@ $ docker build . -f ./fip_api/Dockerfile -t fip-api:0.1.0-nonroot
 $ docker tag fip-api:0.1.0-nonroot localhost:5000/fip-api:0.1.0-nonroot
 $ docker push localhost:5000/fip-api:0.1.0-nonroot
 $ cat ./fip_api/fip-api.yml | kubectl apply -f -
-$ 
+
 $ kubectl -n fip-api-namespace port-forward service/fip-api 8080:8080
-$ 
+
 $ kubectl get -n fip-api-namespace deployment -o yaml | linkerd inject - | kubectl apply -f -
 $ linkerd -n fip-api-namespace check --proxy
 $ linkerd -n fip-api-namespace viz stat deployment
@@ -290,16 +295,14 @@ $ brew install upx
 $ upx --ultra-brute ./target/x86_64-unknown-linux-musl/release/fip_api
 ```
 
-# Build
+# Cross Build
 ```sh
 # 1st WAY
-$ make release PACKAGE="fip_api" RELEASE="--release" TARGET="x86_64-unknown-linux-musl" VERSION="$(git describe --tags --abbrev=0)" -- RUSTFLAGS="-Clinker=lld"
+$ make release ARCH="x86_64" CARGO="cross" OS="macos" PACKAGE="fip_api" RELEASE="--release" STRIP="strip" TARGET="x86_64-unknown-linux-musl" VERSION="$(git describe --tags --abbrev=0)"
 
 # 2nd WAY
-$ make release CARGO="cross" PACKAGE="fip_api" RELEASE="--release" TARGET="x86_64-unknown-linux-musl" VERSION="$(git describe --tags --abbrev=0)"
-
-# 3rd WAY
-$ docker run -v $(pwd):/project -v /var/run/docker.sock:/var/run/docker.sock -w /project --rm cross-build make release PACKAGE="fip_api" RELEASE="--release" TARGET="x86_64-unknown-linux-musl" VERSION="0.1.0"
+$ docker build . -t cross-build:0.1.0
+$ docker run -v $(pwd):/project -v /var/run/docker.sock:/var/run/docker.sock -w /project --rm cross-build:0.1.0 make release ARCH="x86_64" CARGO="cross" OS="linux" PACKAGE="fip_api" RELEASE="--release" STRIP="strip" TARGET="x86_64-unknown-linux-musl" VERSION="$(git describe --tags --abbrev=0)"
 ```
 
 # Scripts
@@ -314,5 +317,5 @@ $ rustc --target ${TRIPLE} --print target-features
 $ perf record --call-graph=dwarf ./target/release/fip_api
 $ perf report --hierarchy -M intel
 
-$ RUSTFLAGS="-Ctarget-cpu=native" cargo build --release
+$ RUSTFLAGS="-C target-cpu=native" cargo build --release
 ```

@@ -1,17 +1,15 @@
 .DEFAULT_GOAL := help
 
-# ARCH
 # CARGO
-# OS
+# coverage
 # PACKAGE
 # RELEASE
 # STRIP
 # TARGET
 # VERSION
 
-ARCH ?= x86_64 # aarch64, arm, asmjs, mips, mips64, msp430, nvptx64, powerpc, powerpc64, riscv, s390x, sparc, sparc64, thumbv6, thumbv7, wasm32, x86, x86_64, unknown
 CARGO ?= cargo
-OS ?= macos # android, cuda, dragonfly, emscripten, freebsd, fuchsia, haiku, hermit, illumos, ios, linux, macos, netbsd, openbsd, redox, solaris, tvos, wasi, windows, vxworks, unknown
+COVERAGE ?= coverage
 PACKAGE ?= fip_api
 # RELEASE ?= --release
 STRIP ?= strip # strip, aarch64-linux-gnu-strip, arm-linux-gnueabihf-strip
@@ -23,33 +21,33 @@ ifdef RELEASE
 	RELEASE = --release
 	TARGET_DIR = target/$(TARGET)/release
 endif
+
 BIN = $(TARGET_DIR)/$(PACKAGE)
-
-# PACKAGE_ROOT = $(__TARGET__)/package
 BIN_NAME = $(PACKAGE)-$(VERSION)-$(TARGET)
-# PACKAGE_BASE = $(PACKAGE_ROOT)/$(BIN_NAME)
 
-CARGO_BENCH = $(CARGO) bench --all-features --frozen --no-default-features --package $(PACKAGE) --target $(TARGET) #--target-dir $(TARGET_DIR)
-CARGO_BUILD = $(CARGO) build --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET) #--target-dir $(TARGET_DIR)
-CARGO_CHECK = $(CARGO) check --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET) #--target-dir $(TARGET_DIR)
-CARGO_CLEAN = $(CARGO) clean --frozen --package $(PACKAGE) $(RELEASE) --target $(TARGET) #--target-dir $(TARGET_DIR)
-CARGO_DOC = $(CARGO) doc --all-features --document-private-items --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET) #--target-dir $(TARGET_DIR)
-CARGO_FETCH = $(CARGO) fetch --locked --target $(TARGET)
-CARGO_FIX = $(CARGO) fix --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET) #--target-dir $(TARGET_DIR)
-CARGO_RUN = $(CARGO) run --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET) #--target-dir $(TARGET_DIR)
-CARGO_TEST = $(CARGO) test --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET) #--target-dir $(TARGET_DIR)
+COVERAGE_DIR = $(TARGET_DIR)/$(COVERAGE)
 
-CARGO_AUDIT = $(CARGO) audit --target-arch $(ARCH) --target-os $(OS)
-CARGO_CLIPPY = $(CARGO) clippy --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET) -- -D warnings #--target-dir $(TARGET_DIR)
-CARGO_DENY = $(CARGO) deny --all-features --no-default-features --target $(TARGET) --workspace
+CARGO_BENCH = $(CARGO) bench --all-features --frozen --no-default-features --package $(PACKAGE) --target-dir $(TARGET_DIR)
+CARGO_BUILD = $(CARGO) build --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target-dir $(TARGET_DIR)
+CARGO_CHECK = $(CARGO) check --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target-dir $(TARGET_DIR)
+CARGO_CLEAN = $(CARGO) clean --frozen --package $(PACKAGE) $(RELEASE) --target-dir $(TARGET_DIR)
+CARGO_DOC = $(CARGO) doc --document-private-items --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target-dir $(TARGET_DIR)
+CARGO_FETCH = $(CARGO) fetch --locked
+CARGO_FIX = $(CARGO) fix --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target-dir $(TARGET_DIR)
+CARGO_RUN = $(CARGO) run --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target-dir $(TARGET_DIR)
+CARGO_TEST = $(CARGO) test --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target-dir $(TARGET_DIR)
+
+CARGO_AUDIT = $(CARGO) audit
+CARGO_CLIPPY = $(CARGO) clippy --all-features --all-targets --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target-dir $(TARGET_DIR) -- -D warnings
+CARGO_DENY = $(CARGO) deny --all-features --no-default-features --workspace
 CARGO_FMT = $(CARGO) fmt --package $(PACKAGE)
 
 $(BIN): add-fmt add-target fetch
-	$(CARGO_BUILD)
+	$(CARGO_BUILD) --target $(TARGET)
 
 .PHONY: add-audit
 add-audit: ## Add the audit
-	$(CARGO) install cargo-audit
+	$(CARGO) install --locked cargo-audit
 
 .PHONY: add-clippy
 add-clippy: ## Add the clippy
@@ -57,11 +55,19 @@ add-clippy: ## Add the clippy
 
 .PHONY: add-deny
 add-deny: ## Add the deny
-	$(CARGO) install cargo-deny
+	$(CARGO) install --locked cargo-deny
 
 .PHONY: add-fmt
 add-fmt: ## Add the fmt
 	rustup component add rustfmt
+
+.PHONY: add-grcov
+add-grcov: ## Add the grcov
+	$(CARGO) install --locked grcov
+
+.PHONY: add-llvm
+add-llvm: ## Add the llvm tools preview
+	rustup component add llvm-tools-preview
 
 .PHONY: add-target
 add-target: ## Add a target
@@ -90,12 +96,18 @@ check: add-fmt add-target fetch ## Check
 clean: add-target ## Clean
 	$(CARGO_CLEAN)
 
+.PHONY: clean-cov
+clean-cov: ## Clean cov
+	find . -name "*.profdata" -exec rm -fr {} +
+	find . -name "*.profraw" -exec rm -fr {} +
+	rm -fr $(COVERAGE_DIR)
+
 .PHONY: clean-doc
 clean-doc: add-target ## Clean doc
 	$(CARGO_CLEAN) --doc
 
 .PHONY: clippy
-clippy: add-clippy add-fmt fetch  ## Clippy
+clippy: add-clippy add-fmt fetch ## Clippy
 	$(CARGO_CLIPPY)
 
 .PHONY: deny-check
@@ -139,15 +151,21 @@ release: $(BIN) ## Release
 	@mkdir -p release
 	cp $(BIN) release/$(BIN_NAME)
 	$(STRIP) release/$(BIN_NAME)
-	shasum -a 256 release/$(BIN_NAME) | cut -d " " -f 1  > release/$(BIN_NAME).sha256
+	shasum -a 256 release/$(BIN_NAME) | cut -d " " -f 1 > release/$(BIN_NAME).sha256
 
 .PHONY: test
 test: add-fmt add-target fetch ## Test
 	$(CARGO_TEST)
 
+.PHONY: test-cov
+test-cov: add-fmt add-grcov add-llvm add-target clean-cov fetch ## Test cov
+	RUSTC_BOOTSTRAP=1 RUSTFLAGS="-Zinstrument-coverage" $(CARGO_BUILD)
+	RUSTC_BOOTSTRAP=1 RUSTFLAGS="-Zinstrument-coverage" $(CARGO_TEST)
+	grcov . --binary-path $(TARGET_DIR) --branch --guess-directory-when-missing --ignore-not-existing --output-path $(COVERAGE_DIR) --output-type html --source-dir .
 
 
-# CARGO_RUSTC = $(CARGO) rustc --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET) #--target-dir $(TARGET_DIR)
+
+# CARGO_RUSTC = $(CARGO) rustc --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target-dir $(TARGET_DIR)
 
 # Usage: rustc [OPTIONS] INPUT
 #
@@ -199,7 +217,7 @@ test: add-fmt add-target fetch ## Test
 
 
 
-# CARGO_RUSTDOC = $(CARGO) rustdoc --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET) #--target-dir $(TARGET_DIR)
+# CARGO_RUSTDOC = $(CARGO) rustdoc --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target-dir $(TARGET_DIR)
 
 # rustdoc [options] <input>
 #

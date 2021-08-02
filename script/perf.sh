@@ -16,5 +16,5 @@ RUSTFLAGS="-Cprofile-generate=/tmp/pgo-data" \
 llvm-profdata merge -o /tmp/pgo-data/merged.profdata /tmp/pgo-data
 
 # STEP 4: Use the `.profdata` file for guiding optimizations
-RUSTFLAGS="-Cllvm-args=-pgo-warn-missing-function,-Cprofile-use=/tmp/pgo-data/merged.profdata" \
+RUSTFLAGS="-Cllvm-args=-pgo-warn-missing-function -Cprofile-use=/tmp/pgo-data/merged.profdata" \
     cargo build -p fip_api --release --target x86_64-apple-darwins
