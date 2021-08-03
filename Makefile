@@ -1,6 +1,8 @@
 .DEFAULT_GOAL := help
 
+# ARCH
 # CARGO
+# OS
 # COVERAGE
 # PACKAGE
 # RELEASE
@@ -8,7 +10,9 @@
 # TARGET
 # VERSION
 
+ARCH ?= x86_64 # aarch64, arm, asmjs, mips, mips64, msp430, nvptx64, powerpc, powerpc64, riscv, s390x, sparc, sparc64, thumbv6, thumbv7, wasm32, x86, x86_64, unknown
 CARGO ?= cargo
+OS ?= macos # android, cuda, dragonfly, emscripten, freebsd, fuchsia, haiku, hermit, illumos, ios, linux, macos, netbsd, openbsd, redox, solaris, tvos, wasi, windows, vxworks, unknown
 COVERAGE ?= coverage
 PACKAGE ?= fip_api
 # RELEASE ?= --release
@@ -18,33 +22,32 @@ VERSION ?= v0.1.0
 
 TARGET_DIR = target/$(TARGET)/debug
 ifdef RELEASE
-	RELEASE = --release
 	TARGET_DIR = target/$(TARGET)/release
 endif
 
 BIN = $(TARGET_DIR)/$(PACKAGE)
 BIN_NAME = $(PACKAGE)-$(VERSION)-$(TARGET)
 
-COVERAGE_DIR = $(TARGET_DIR)/$(COVERAGE)
+COVERAGE_DIR = $(TARGET_DIR)/../$(COVERAGE)
 
-CARGO_BENCH = $(CARGO) bench --all-features --frozen --no-default-features --package $(PACKAGE) --target-dir $(TARGET_DIR)
-CARGO_BUILD = $(CARGO) build --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target-dir $(TARGET_DIR)
-CARGO_CHECK = $(CARGO) check --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target-dir $(TARGET_DIR)
-CARGO_CLEAN = $(CARGO) clean --frozen --package $(PACKAGE) $(RELEASE) --target-dir $(TARGET_DIR)
-CARGO_DOC = $(CARGO) doc --document-private-items --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target-dir $(TARGET_DIR)
-CARGO_FETCH = $(CARGO) fetch --locked
-CARGO_FIX = $(CARGO) fix --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target-dir $(TARGET_DIR)
-CARGO_RUN = $(CARGO) run --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target-dir $(TARGET_DIR)
-CARGO_TEST = $(CARGO) test --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target-dir $(TARGET_DIR)
+CARGO_BENCH = $(CARGO) bench --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
+CARGO_BUILD = $(CARGO) build --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
+CARGO_CHECK = $(CARGO) check --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
+CARGO_CLEAN = $(CARGO) clean --frozen --package $(PACKAGE) $(RELEASE) --target $(TARGET)
+CARGO_DOC = $(CARGO) doc --document-private-items --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
+CARGO_FETCH = $(CARGO) fetch --locked --target $(TARGET)
+CARGO_FIX = $(CARGO) fix --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
+CARGO_RUN = $(CARGO) run --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
+CARGO_TEST = $(CARGO) test --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
 
-CARGO_AUDIT = $(CARGO) audit
-CARGO_CLIPPY = $(CARGO) clippy --all-features --all-targets --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target-dir $(TARGET_DIR) -- -D warnings
+CARGO_AUDIT = $(CARGO) audit $(ARCH) --target-os $(OS)
+CARGO_CLIPPY = $(CARGO) clippy --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET) -- -D warnings
 CARGO_DENY = $(CARGO) deny --all-features --no-default-features --workspace
 CARGO_FMT = $(CARGO) fmt --package $(PACKAGE)
 
 .PHONY: $(BIN)
 $(BIN): add-fmt add-target fetch
-	$(CARGO_BUILD) --target $(TARGET)
+	$(CARGO_BUILD)
 
 .PHONY: add-audit
 add-audit: ## Add the audit
@@ -77,8 +80,8 @@ add-target: ## Add a target
 .PHONY: help
 help: ## Help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
-	| sort \
-	| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+		| sort \
+		| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 .PHONY: audit
 audit: add-audit ## Audit
@@ -151,12 +154,11 @@ fmt-check: add-fmt ## FMT check
 
 .PHONY: release
 release: $(BIN) ## Release
-	ls -al $(TARGET_DIR)
 	mkdir -p release
 	cp $(BIN) release/$(BIN_NAME)
 	$(STRIP) release/$(BIN_NAME)
 	shasum -a 256 release/$(BIN_NAME) \
-	| cut -d " " -f 1 > release/$(BIN_NAME).sha256
+		| cut -d " " -f 1 > release/$(BIN_NAME).sha256
 
 .PHONY: test
 test: add-fmt add-target fetch ## Test
@@ -167,17 +169,17 @@ test-cov: add-fmt add-grcov add-llvm add-target clean-cov fetch ## Test cov
 	RUSTC_BOOTSTRAP=1 RUSTFLAGS="-Zinstrument-coverage" $(CARGO_BUILD)
 	RUSTC_BOOTSTRAP=1 RUSTFLAGS="-Zinstrument-coverage" $(CARGO_TEST)
 	grcov . \
-	--binary-path $(TARGET_DIR) \
-	--branch \
-	--guess-directory-when-missing \
-	--ignore-not-existing \
-	--output-path $(COVERAGE_DIR) \
-	--output-type html \
-	--source-dir .
+		--binary-path $(TARGET_DIR) \
+		--branch \
+		--guess-directory-when-missing \
+		--ignore-not-existing \
+		--output-path $(COVERAGE_DIR) \
+		--output-type html \
+		--source-dir .
 
 
 
-# CARGO_RUSTC = $(CARGO) rustc --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target-dir $(TARGET_DIR)
+# CARGO_RUSTC = $(CARGO) rustc --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
 
 # Usage: rustc [OPTIONS] INPUT
 #
@@ -229,7 +231,7 @@ test-cov: add-fmt add-grcov add-llvm add-target clean-cov fetch ## Test cov
 
 
 
-# CARGO_RUSTDOC = $(CARGO) rustdoc --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target-dir $(TARGET_DIR)
+# CARGO_RUSTDOC = $(CARGO) rustdoc --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
 
 # rustdoc [options] <input>
 #
