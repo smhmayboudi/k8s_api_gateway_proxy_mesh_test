@@ -151,6 +151,7 @@ fmt-check: add-fmt ## FMT check
 
 .PHONY: release
 release: $(BIN) ## Release
+	ls -al $(TARGET_DIR)
 	mkdir -p release
 	cp $(BIN) release/$(BIN_NAME)
 	$(STRIP) release/$(BIN_NAME)
