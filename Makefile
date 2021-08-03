@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 
 # CARGO
-# coverage
+# COVERAGE
 # PACKAGE
 # RELEASE
 # STRIP
@@ -42,6 +42,7 @@ CARGO_CLIPPY = $(CARGO) clippy --all-features --all-targets --frozen --no-defaul
 CARGO_DENY = $(CARGO) deny --all-features --no-default-features --workspace
 CARGO_FMT = $(CARGO) fmt --package $(PACKAGE)
 
+.PHONY: $(BIN)
 $(BIN): add-fmt add-target fetch
 	$(CARGO_BUILD) --target $(TARGET)
 
@@ -75,7 +76,9 @@ add-target: ## Add a target
 
 .PHONY: help
 help: ## Help
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
+	| sort \
+	| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 .PHONY: audit
 audit: add-audit ## Audit
@@ -148,10 +151,11 @@ fmt-check: add-fmt ## FMT check
 
 .PHONY: release
 release: $(BIN) ## Release
-	@mkdir -p release
+	mkdir -p release
 	cp $(BIN) release/$(BIN_NAME)
 	$(STRIP) release/$(BIN_NAME)
-	shasum -a 256 release/$(BIN_NAME) | cut -d " " -f 1 > release/$(BIN_NAME).sha256
+	shasum -a 256 release/$(BIN_NAME) \
+	| cut -d " " -f 1 > release/$(BIN_NAME).sha256
 
 .PHONY: test
 test: add-fmt add-target fetch ## Test
@@ -161,7 +165,14 @@ test: add-fmt add-target fetch ## Test
 test-cov: add-fmt add-grcov add-llvm add-target clean-cov fetch ## Test cov
 	RUSTC_BOOTSTRAP=1 RUSTFLAGS="-Zinstrument-coverage" $(CARGO_BUILD)
 	RUSTC_BOOTSTRAP=1 RUSTFLAGS="-Zinstrument-coverage" $(CARGO_TEST)
-	grcov . --binary-path $(TARGET_DIR) --branch --guess-directory-when-missing --ignore-not-existing --output-path $(COVERAGE_DIR) --output-type html --source-dir .
+	grcov . \
+	--binary-path $(TARGET_DIR) \
+	--branch \
+	--guess-directory-when-missing \
+	--ignore-not-existing \
+	--output-path $(COVERAGE_DIR) \
+	--output-type html \
+	--source-dir .
 
 
 

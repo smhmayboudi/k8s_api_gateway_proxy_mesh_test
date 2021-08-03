@@ -5,7 +5,7 @@ default:
     key: "${CI_PROJECT_PATH_SLUG}"
     paths:
     - "/usr/local/cargo/registry"
-  image: "rust:1.54.0-buster"
+  image: "core-harbor.playpod.ir/proxy_cache/library/rust:1.54.0-buster"
 
 .default-rule: &default-rule
   only: 

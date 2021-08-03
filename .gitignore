@@ -1,3 +1,6 @@
+*.profdata
+*.profraw
+coverage/
 release/
 
 # Created by https://www.toptal.com/developers/gitignore/api/macos,rust,osx,visualstudiocode,vscodev
