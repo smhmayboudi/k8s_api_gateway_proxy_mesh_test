@@ -5,7 +5,7 @@ default:
     key: "${CI_PROJECT_PATH_SLUG}"
     paths:
     - "/usr/local/cargo/registry"
-  image: "core-harbor.playpod.ir/proxy_cache/library/rust-cross-build:latest"
+  image: "core-harbor.playpod.ir/library/rust-cross-build:latest"
 
 .default-rule: &default-rule
   only: 
