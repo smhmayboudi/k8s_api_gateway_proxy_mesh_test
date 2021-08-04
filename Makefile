@@ -1,19 +1,13 @@
 .DEFAULT_GOAL := help
 
-# ARCH
 # CARGO
-# OS
-# COVERAGE
 # PACKAGE
 # RELEASE
 # STRIP
 # TARGET
 # VERSION
 
-ARCH ?= x86_64 # aarch64, arm, asmjs, mips, mips64, msp430, nvptx64, powerpc, powerpc64, riscv, s390x, sparc, sparc64, thumbv6, thumbv7, wasm32, x86, x86_64, unknown
 CARGO ?= cargo
-OS ?= macos # android, cuda, dragonfly, emscripten, freebsd, fuchsia, haiku, hermit, illumos, ios, linux, macos, netbsd, openbsd, redox, solaris, tvos, wasi, windows, vxworks, unknown
-COVERAGE ?= coverage
 PACKAGE ?= fip_api
 # RELEASE ?= --release
 STRIP ?= strip # strip, aarch64-linux-gnu-strip, arm-linux-gnueabihf-strip
@@ -28,20 +22,20 @@ endif
 BIN = $(TARGET_DIR)/$(PACKAGE)
 BIN_NAME = $(PACKAGE)-$(VERSION)-$(TARGET)
 
-COVERAGE_DIR = $(TARGET_DIR)/../$(COVERAGE)
+COVERAGE_DIR = $(TARGET_DIR)/coverage
 
-CARGO_BENCH = $(CARGO) bench --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
-CARGO_BUILD = $(CARGO) build --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
-CARGO_CHECK = $(CARGO) check --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
+CARGO_BENCH = $(CARGO) bench --all-features --all-targets --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
+CARGO_BUILD = $(CARGO) build --all-features --all-targets --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
+CARGO_CHECK = $(CARGO) check --all-features --all-targets --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
 CARGO_CLEAN = $(CARGO) clean --frozen --package $(PACKAGE) $(RELEASE) --target $(TARGET)
 CARGO_DOC = $(CARGO) doc --document-private-items --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
 CARGO_FETCH = $(CARGO) fetch --locked --target $(TARGET)
 CARGO_FIX = $(CARGO) fix --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
 CARGO_RUN = $(CARGO) run --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
-CARGO_TEST = $(CARGO) test --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
+CARGO_TEST = $(CARGO) test --all-features --all-targets --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
 
-CARGO_AUDIT = $(CARGO) audit $(ARCH) --target-os $(OS)
-CARGO_CLIPPY = $(CARGO) clippy --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET) -- -D warnings
+CARGO_AUDIT = $(CARGO) audit
+CARGO_CLIPPY = $(CARGO) clippy --all-features --all-targets --frozen --no-default-features --workspace -- -D warnings
 CARGO_DENY = $(CARGO) deny --all-features --no-default-features --workspace
 CARGO_FMT = $(CARGO) fmt --package $(PACKAGE)
 

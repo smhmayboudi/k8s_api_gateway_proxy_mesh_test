@@ -298,11 +298,11 @@ $ upx --ultra-brute ./target/x86_64-unknown-linux-musl/release/fip_api
 # Cross Build
 ```sh
 # 1st WAY
-$ make release ARCH="x86_64" CARGO="cross" OS="macos" PACKAGE="fip_api" RELEASE="--release" STRIP="strip" TARGET="x86_64-unknown-linux-musl" VERSION="$(git describe --tags --abbrev=0)"
+$ make release CARGO="cross" PACKAGE="fip_api" RELEASE="--release" STRIP="strip" TARGET="x86_64-unknown-linux-musl" VERSION="$(git describe --tags --abbrev=0)"
 
 # 2nd WAY
 $ docker build . -t cross-build:0.1.0
-$ docker run -v $(pwd):/project -v /var/run/docker.sock:/var/run/docker.sock -w /project --rm cross-build:0.1.0 make release ARCH="x86_64" CARGO="cross" OS="linux" PACKAGE="fip_api" RELEASE="--release" STRIP="strip" TARGET="x86_64-unknown-linux-musl" VERSION="$(git describe --tags --abbrev=0)"
+$ docker run -v $(pwd):/project -v /var/run/docker.sock:/var/run/docker.sock -w /project --rm cross-build:0.1.0 make release CARGO="cross" PACKAGE="fip_api" RELEASE="--release" STRIP="strip" TARGET="x86_64-unknown-linux-musl" VERSION="$(git describe --tags --abbrev=0)"
 ```
 
 # Scripts
