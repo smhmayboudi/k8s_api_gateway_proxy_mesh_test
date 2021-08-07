@@ -1,16 +1,16 @@
 .DEFAULT_GOAL := help
 
-# CARGO
-# PACKAGE
-# RELEASE
-# STRIP
-# TARGET
-# VERSION
+# CARGO: cargo, cross
+# PACKAGE: fip_api
+# RELEASE: --release
+# STRIP: aarch64-linux-gnu-strip, arm-linux-gnueabihf-strip, strip
+# TARGET: aarch64-unknown-linux-musl, armv7-unknown-linux-musleabihf, x86_64-unknown-linux-musl
+# VERSION: git describe --tags --abbrev=0
 
 CARGO ?= cargo
 PACKAGE ?= fip_api
 # RELEASE ?= --release
-STRIP ?= strip # strip, aarch64-linux-gnu-strip, arm-linux-gnueabihf-strip
+STRIP ?= strip
 TARGET ?= $(shell rustup show | sed -n 's/^Default host: \(.*\)/\1/p')
 VERSION ?= v0.1.0
 
@@ -39,7 +39,6 @@ CARGO_CLIPPY = $(CARGO) clippy --all-features --all-targets --frozen --no-defaul
 CARGO_DENY = $(CARGO) deny --all-features --no-default-features --workspace
 CARGO_FMT = $(CARGO) fmt --package $(PACKAGE)
 
-.PHONY: $(BIN)
 $(BIN): add-fmt add-target fetch
 	$(CARGO_BUILD)
 
