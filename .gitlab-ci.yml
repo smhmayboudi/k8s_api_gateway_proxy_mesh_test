@@ -15,12 +15,9 @@ default:
       - "/usr/local/cargo/registry"
   image: "core-harbor.playpod.ir/library/rust-build:${RUST_VERSION}"
 
-.default-rule: &default-rule
-  only:
-    - "merge-requests"
-
-.dependencies: &dependencies
-  dependencies: []
+# .default-rule: &default-rule
+#   only:
+#     - "merge-requests"
 
 .target_1: &target_1
   variables:
@@ -43,10 +40,10 @@ rust_build:
   before_script:
     - "echo -n \"${HARBOR_PASSWORD}\" \
       | docker login --password-stdin ${HARBOR_REGISTRY_URL} --username ${HARBOR_USERNAME}"
-  extends:
-    - ".default-rule"
-    - ".dependencies"
-  image: "${HARBOR_REGISTRY_URL}/proxy_cache/library/docker:18-git"
+  dependencies: []
+  # extends:
+  #   - ".default-rule"
+  image: "${HARBOR_REGISTRY_URL}/proxy_cache/library/docker:18.09.9-git"
   script:
     - "docker pull ${HARBOR_REGISTRY_URL}/library/rust-build:${RUST_VERSION} || true"
     - "docker build --build-arg RUST_VERSION=${RUST_VERSION} \
@@ -56,7 +53,7 @@ rust_build:
       ."
     - "docker push ${HARBOR_REGISTRY_URL}/library/rust-build"
   services:
-    - "${HARBOR_REGISTRY_URL}/proxy_cache/library/docker:18-dind"
+    - "${HARBOR_REGISTRY_URL}/proxy_cache/library/docker:18.09.9-dind"
   stage: "rust_build"
   variables:
     DOCKER_DRIVER: "overlay2"
@@ -68,16 +65,17 @@ rust_build:
   artifacts:
     expire_in: "1 week"
     paths:
-    - "release"
-  extends:
-    - ".default-rule"
-    - ".dependencies"
+      - "release"
+    # public: false
+  # extends:
+  #   - ".default-rule"
   script:
     - "make release"
   services:
-    - "${HARBOR_REGISTRY_URL}/proxy_cache/library/docker:18-dind"
+    - "${HARBOR_REGISTRY_URL}/proxy_cache/library/docker:18.09.9-dind"
   stage: "build"
   variables:
+    CROSS_DOCKER_IN_DOCKER: "false"
     DOCKER_DRIVER: "overlay2"
     DOCKER_HOST: "tcp://localhost:2375"
     DOCKER_TLS_CERTDIR: ""
@@ -85,10 +83,9 @@ rust_build:
   when: "manual"
 
 .upload: &upload
-  extends:
-    - ".default-rule"
-    - ".dependencies"
-  image: curlimages/curl:latest
+  # extends:
+  #   - ".default-rule"
+  image: curlimages/curl:7.78.0
   script:
     - "curl \
       --header \"JOB-TOKEN: ${CI_JOB_TOKEN}\" \
@@ -100,14 +97,13 @@ rust_build:
       ${PACKAGE_REGISTRY_URL}/${PACKAGE}-${VERSION}-${TARGET}.sha256"
   stage: "upload"
   variables:
-    VERSION: "${CI_COMMIT_TAG}"
     PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PACKAGE}/${VERSION}"
+    VERSION: "${CI_COMMIT_TAG}"
   when: "manual"
 
 .release: &release
-  extends:
-    - ".default-rule"
-    - ".dependencies"
+  # extends:
+  #   - ".default-rule"
   image: "registry.gitlab.com/gitlab-org/release-cli:latest"
   release:
     assets:
@@ -143,8 +139,8 @@ rust_build:
     - "echo \"running release_job\""
   stage: "release"
   variables:
-    VERSION: "${CI_COMMIT_TAG}"
     PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PACKAGE}/${VERSION}"
+    VERSION: "${CI_COMMIT_TAG}"
   when: "manual"
 
 .test: &test
@@ -152,9 +148,9 @@ rust_build:
     expire_in: "1 week"
     paths:
       - "coverage"
-  extends:
-    - ".default-rule"
-    - ".dependencies"
+    # public: false
+  # extends:
+  #   - ".default-rule"
   script:
     - "make test-cov"
   stage: "test"
@@ -167,22 +163,21 @@ rust_build:
     expire_in: "1 week"
     paths:
       - "public/${PACKAGE}"
-  extends:
-    - ".default-rule"
-    - ".dependencies"
+    # public: false
+  # extends:
+  #   - ".default-rule"
   script:
     - "rm -Rf public/${PACKAGE}"
     - "mkdir -p public/${PACKAGE}"
-    - "cp -R coverage/* public/${PACKAGE}"
+    - "cp -R coverage public/${PACKAGE}"
   stage: "coverage"
   variables:
     VERSION: "${CI_COMMIT_TAG}"
   when: "manual"
 
 .deploy: &deploy
-  extends:
-    - ".default-rule"
-    - ".dependencies"
+  # extends:
+  #   - ".default-rule"
   image: "docker:20.10.7"
   script:
     - "docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}"

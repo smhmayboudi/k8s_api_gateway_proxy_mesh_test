@@ -16,63 +16,74 @@
 # rust_build
 
 build_1:fip_api:
+  dependencies: []
   extends:
     - ".build"
     - ".fip_api"
     - ".target_1"
 
 upload_1:fip_api:
+  dependencies:
+    - "build_1:fip_api"
   extends:
     - ".fip_api"
     - ".target_1"
     - ".upload"
   needs:
     - "build_1:fip_api"
-    - "build_2:fip_api"
-    - "build_3:fip_api"
+    # - "build_2:fip_api"
+    # - "build_3:fip_api"
 
 build_2:fip_api:
+  dependencies: []
   extends:
     - ".build"
     - ".fip_api"
     - ".target_2"
 
 upload_2:fip_api:
+  dependencies:
+    - "build_2:fip_api"
   extends:
     - ".fip_api"
     - ".target_2"
     - ".upload"
   needs:
-    - "build_1:fip_api"
+    # - "build_1:fip_api"
     - "build_2:fip_api"
-    - "build_3:fip_api"
+    # - "build_3:fip_api"
 
 build_3:fip_api:
+  dependencies: []
   extends:
     - ".build"
     - ".fip_api"
     - ".target_3"
 
 upload_3:fip_api:
+  dependencies:
+    - "build_3:fip_api"
   extends:
     - ".fip_api"
     - ".target_3"
     - ".upload"
   needs:
-    - "build_1:fip_api"
-    - "build_2:fip_api"
+    # - "build_1:fip_api"
+    # - "build_2:fip_api"
     - "build_3:fip_api"
 
 release:fip_api:
+  dependencies: []
   extends:
     - ".release"
     - ".fip_api"
   needs:
-    - "upload_1:fip_api"
-    - "upload_2:fip_api"
+    # - "upload_1:fip_api"
+    # - "upload_2:fip_api"
     - "upload_3:fip_api"
 
 test:fip_api:
+  dependencies: []
   extends:
     - ".test"
     - ".fip_api"
@@ -89,6 +100,7 @@ coverage:fip_api:
     - "test:fip_api"
 
 deploy:fip_api:
+  dependencies: []
   extends:
     - ".deploy"
     - ".fip_api"
