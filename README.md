@@ -237,15 +237,16 @@ $ linkerd -n fip-api-namespace viz stat deployment
 
 ```sh
 $ docker pull curlimages/curl:7.78.0
-$ docker pull docker:20.10.7-dind-rootless
 $ docker pull gcr.io/distroless/cc:nonroot
-$ docker pull jaegertracing/all-in-one:1.24.0
+$ docker pull jaegertracing/all-in-one:1.25.0
 $ docker pull materialize/materialized:v0.8.3
 $ docker pull mcr.microsoft.com/vscode/devcontainers/rust:0.200.7-1
 $ docker pull openzipkin/zipkin:2.23.2
 $ docker pull registry:2.7.1
 $ docker pull rust:1.54.0-buster
-$ docker pull rustembedded/cross:x86_64-unknown-linux-musl-0.2.1
+$ docker pull rustembedded/cross:aarch64-unknown-linux-musl-0.2.1 && \
+$ docker pull rustembedded/cross:armv7-unknown-linux-musleabihf-0.2.1 && \
+$ docker pull rustembedded/cross:x86_64-unknown-linux-musl-0.2.1 && \
 $ docker pull timberio/vector:0.15.1-distroless-static
 $ docker pull vectorized/redpanda:v21.7.6
 ```

@@ -74,7 +74,7 @@ add-target: ## Add a target
 help: ## Help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 		| sort \
-		| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $${1}, $${2}}'
+		| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 .PHONY: audit
 audit: add-audit ## Audit
@@ -91,7 +91,7 @@ build: $(BIN) ## Build
 check: add-fmt add-target fetch ## Check
 	$(CARGO_CHECK)
 
-.PHONY: clean
+.PHONY: clean-build
 clean: add-target ## Clean
 	$(CARGO_CLEAN)
 
@@ -170,7 +170,7 @@ test-cov: add-fmt add-grcov add-llvm add-target clean-cov fetch ## Test cov
 		--output-type html \
 		--source-dir .
 	mkdir -p coverage
-	cp -R $(COVERAGE_DIR)/* coverage
+	cp -R $(COVERAGE_DIR) .
 
 
 
