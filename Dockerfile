@@ -1,4 +1,5 @@
-FROM rust:1.54.0-buster
+ARG RUST_VERSION=1.54.0-buster
+FROM rust:${RUST_VERSION}
 RUN apt-get update && \
     apt-get install -y \
         binutils-aarch64-linux-gnu \

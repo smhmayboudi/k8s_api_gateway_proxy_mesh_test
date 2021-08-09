@@ -23,7 +23,7 @@ $ git config --global commit.gpgsign true
 $ git config --global gpg.program gpg
 $ git config --global user.email "${EMAIL_ADDRESS}"
 $ git config --global user.name "${FIRST_NAME} ${LAST_NAME}"
-$ git config --global user.signingkey {SEC_ID}
+$ git config --global user.signingkey ${SEC_ID}
 ```
 
 # Rustup

@@ -24,18 +24,18 @@ BIN_NAME = $(PACKAGE)-$(VERSION)-$(TARGET)
 
 COVERAGE_DIR = $(TARGET_DIR)/coverage
 
-CARGO_BENCH = $(CARGO) bench --all-features --all-targets --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
-CARGO_BUILD = $(CARGO) build --all-features --all-targets --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
-CARGO_CHECK = $(CARGO) check --all-features --all-targets --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
+CARGO_BENCH = $(CARGO) bench --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
+CARGO_BUILD = $(CARGO) build --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
+CARGO_CHECK = $(CARGO) check --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
 CARGO_CLEAN = $(CARGO) clean --frozen --package $(PACKAGE) $(RELEASE) --target $(TARGET)
 CARGO_DOC = $(CARGO) doc --document-private-items --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
 CARGO_FETCH = $(CARGO) fetch --locked --target $(TARGET)
 CARGO_FIX = $(CARGO) fix --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
 CARGO_RUN = $(CARGO) run --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
-CARGO_TEST = $(CARGO) test --all-features --all-targets --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
+CARGO_TEST = $(CARGO) test --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
 
 CARGO_AUDIT = $(CARGO) audit
-CARGO_CLIPPY = $(CARGO) clippy --all-features --all-targets --frozen --no-default-features --workspace -- -D warnings
+CARGO_CLIPPY = $(CARGO) clippy --all-features --frozen --no-default-features --workspace -- -D warnings --target $(TARGET)
 CARGO_DENY = $(CARGO) deny --all-features --no-default-features --workspace
 CARGO_FMT = $(CARGO) fmt --package $(PACKAGE)
 
@@ -74,7 +74,7 @@ add-target: ## Add a target
 help: ## Help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 		| sort \
-		| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+		| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $${1}, $${2}}'
 
 .PHONY: audit
 audit: add-audit ## Audit
@@ -169,6 +169,8 @@ test-cov: add-fmt add-grcov add-llvm add-target clean-cov fetch ## Test cov
 		--output-path $(COVERAGE_DIR) \
 		--output-type html \
 		--source-dir .
+	mkdir -p coverage
+	cp -R $(COVERAGE_DIR)/* coverage
 
 
 
