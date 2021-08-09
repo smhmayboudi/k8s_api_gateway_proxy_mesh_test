@@ -91,7 +91,7 @@ build: $(BIN) ## Build
 check: add-fmt add-target fetch ## Check
 	$(CARGO_CHECK)
 
-.PHONY: clean
+.PHONY: clean-build
 clean: add-target ## Clean
 	$(CARGO_CLEAN)
 
@@ -170,7 +170,7 @@ test-cov: add-fmt add-grcov add-llvm add-target clean-cov fetch ## Test cov
 		--output-type html \
 		--source-dir .
 	mkdir -p coverage
-	cp -R $(COVERAGE_DIR)/* coverage
+	cp -R $(COVERAGE_DIR) .
 
 
 
