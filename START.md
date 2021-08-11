@@ -6,8 +6,8 @@ $ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
 $ rustup show
 
-$ rustup update && \
-  rustup self update && \
+$ rustup self update && \
+  rustup update && \
   rustup update nightly
 
 $ rustup default
@@ -19,7 +19,7 @@ $ rustup target list
 $ rustup target add x86_64-apple-darwin
 
 $ rustup component list
-$ rustup component add \
+$ rustup +nightly component add \
     cargo \
     clippy \
     llvm-tools-preview \
@@ -32,7 +32,6 @@ $ rustup component add \
     rust-std \
     rustc \
     rustc-dev \
-    rustc-docs \
     rustfmt
 
 $ rustup doc

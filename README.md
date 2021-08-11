@@ -2,7 +2,6 @@
 
 [![coverage](https://shields.io/endpoint?url=https://sample.github.io/awesome/coverage.json)](https://sample.github.io/awesome/index.html)
 
-
 [![coverage](https://sample.github.io/awesome/badges/flat.svg)](https://sample.github.io/awesome/index.html)
 
 # SSH Key
@@ -31,19 +30,23 @@ $ git config --global user.signingkey ${SEC_ID}
 ```sh
 $ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 $ rustup toolchain install nightly
-$ rustup component add \
+$ rustup +nightly component add \
     cargo \
     clippy \
     llvm-tools-preview \
+    miri \
     rls \
     rust-analysis \
+    rust-analyzer-preview \
     rust-docs \
     rust-src \
     rust-std \
     rustc \
+    rustc-dev \
     rustfmt
-$ rustup +nightly component add miri
-$ rustup update && rustup self update
+$ rustup self update && \
+  rustup update && \
+  rustup update nightly
 ```
 
 # Cargo

@@ -166,7 +166,7 @@ rust_build:
   # extends:
   #   - ".default-rule"
   script:
-    - "rm -Rf public/${PACKAGE}"
+    - "rm -fr public/${PACKAGE}"
     - "mkdir -p public/${PACKAGE}"
     - "cp -R coverage public/${PACKAGE}"
   stage: "coverage"

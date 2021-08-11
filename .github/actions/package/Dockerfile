@@ -9,7 +9,7 @@ RUN apt-get update && \
         musl-tools \
         && \
     apt-get clean && \
-    rm -rf \
+    rm -fr \
         /var/lib/apt/lists/* \
         /tmp/* \
         /var/tmp/

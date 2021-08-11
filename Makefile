@@ -14,28 +14,30 @@ STRIP ?= strip
 TARGET ?= $(shell rustup show | sed -n 's/^Default host: \(.*\)/\1/p')
 VERSION ?= v0.1.0
 
-TARGET_DIR = target/$(TARGET)/debug
+TARGET_DIR = target/$(TARGET)
+BIN_DIR = $(TARGET_DIR)/debug
 ifdef RELEASE
-	TARGET_DIR = target/$(TARGET)/release
+	BIN_DIR = $(TARGET_DIR)/release
 endif
 
-BIN = $(TARGET_DIR)/$(PACKAGE)
+BIN = $(BIN_DIR)/$(PACKAGE)
 BIN_NAME = $(PACKAGE)-$(VERSION)-$(TARGET)
 
-COVERAGE_DIR = $(TARGET_DIR)/coverage
+COVERAGE_DIR = $(TARGET_DIR)/cov
+DOCUMENTATION_DIR = $(TARGET_DIR)/doc
 
-CARGO_BENCH = $(CARGO) bench --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
-CARGO_BUILD = $(CARGO) build --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
-CARGO_CHECK = $(CARGO) check --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
+CARGO_BENCH = $(CARGO) bench --all-features --all-targets --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
+CARGO_BUILD = $(CARGO) build --all-features --all-targets --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
+CARGO_CHECK = $(CARGO) check --all-features --all-targets --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
 CARGO_CLEAN = $(CARGO) clean --frozen --package $(PACKAGE) $(RELEASE) --target $(TARGET)
 CARGO_DOC = $(CARGO) doc --document-private-items --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
 CARGO_FETCH = $(CARGO) fetch --locked --target $(TARGET)
 CARGO_FIX = $(CARGO) fix --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
 CARGO_RUN = $(CARGO) run --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
-CARGO_TEST = $(CARGO) test --all-features --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
+CARGO_TEST = $(CARGO) test --all-features --all-targets --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
 
 CARGO_AUDIT = $(CARGO) audit
-CARGO_CLIPPY = $(CARGO) clippy --all-features --frozen --no-default-features --workspace -- -D warnings --target $(TARGET)
+CARGO_CLIPPY = $(CARGO) clippy --all-features --all-targets --frozen --no-default-features --workspace -- -D warnings
 CARGO_DENY = $(CARGO) deny --all-features --no-default-features --workspace
 CARGO_FMT = $(CARGO) fmt --package $(PACKAGE)
 
@@ -91,19 +93,31 @@ build: $(BIN) ## Build
 check: add-fmt add-target fetch ## Check
 	$(CARGO_CHECK)
 
+.PHONY: clean
+clean: clean-build clean-cov clean-doc clean-release ## Clean
+	rm -fr target
+
 .PHONY: clean-build
-clean: add-target ## Clean
+clean-build: add-target ## Clean build
 	$(CARGO_CLEAN)
+	rm -fr $(BIN_DIR)
 
 .PHONY: clean-cov
-clean-cov: ## Clean cov
+clean-cov: add-target ## Clean cov
 	find . -name "*.profdata" -exec rm -fr {} +
 	find . -name "*.profraw" -exec rm -fr {} +
 	rm -fr $(COVERAGE_DIR)
+	rm -fr coverage
 
 .PHONY: clean-doc
 clean-doc: add-target ## Clean doc
 	$(CARGO_CLEAN) --doc
+	rm -fr $(DOCUMENTATION_DIR)
+	rm -fr documentation
+
+.PHONY: clean-release
+clean-release: add-target ## Clean release
+	rm -fr release
 
 .PHONY: clippy
 clippy: add-clippy add-fmt fetch ## Clippy
@@ -124,6 +138,8 @@ deny-fix: add-deny fetch ## Deny fix
 .PHONY: doc
 doc: add-fmt add-target fetch ## Doc
 	$(CARGO_DOC)
+	mkdir -p documentation
+	cp -R $(DOCUMENTATION_DIR)/* documentation
 
 .PHONY: fetch
 fetch: Cargo.lock ## Fetch
@@ -162,7 +178,7 @@ test-cov: add-fmt add-grcov add-llvm add-target clean-cov fetch ## Test cov
 	RUSTC_BOOTSTRAP=1 RUSTFLAGS="-Zinstrument-coverage" $(CARGO_BUILD)
 	RUSTC_BOOTSTRAP=1 RUSTFLAGS="-Zinstrument-coverage" $(CARGO_TEST)
 	grcov . \
-		--binary-path $(TARGET_DIR) \
+		--binary-path $(BIN_DIR) \
 		--branch \
 		--guess-directory-when-missing \
 		--ignore-not-existing \
@@ -170,7 +186,7 @@ test-cov: add-fmt add-grcov add-llvm add-target clean-cov fetch ## Test cov
 		--output-type html \
 		--source-dir .
 	mkdir -p coverage
-	cp -R $(COVERAGE_DIR) .
+	cp -R $(COVERAGE_DIR)/* coverage
 
 
 
@@ -263,9 +279,9 @@ test-cov: add-fmt add-grcov add-llvm add-target clean-cov fetch ## Test cov
 #         --plugins PLUGINS
 #                         removed
 #         --no-defaults   don't run the default passes
-#         --document-private-items 
+#         --document-private-items
 #                         document private items
-#         --document-hidden-items 
+#         --document-hidden-items
 #                         document items that have doc(hidden)
 #         --test          run code examples as tests
 #         --test-args ARGS
@@ -295,7 +311,7 @@ test-cov: add-fmt add-grcov add-llvm add-target clean-cov fetch ## Test cov
 #                         documentation
 #         --markdown-playground-url URL
 #                         URL to send code snippets to
-#         --markdown-no-toc 
+#         --markdown-no-toc
 #                         don't include table of contents
 #     -e, --extend-css PATH
 #                         To add some CSS rules with a given file to generate
@@ -308,11 +324,11 @@ test-cov: add-fmt add-grcov add-llvm add-target clean-cov fetch ## Test cov
 #                         URL to send code snippets to, may be reset by
 #                         --markdown-playground-url or
 #                         `#![doc(html_playground_url=...)]`
-#         --display-warnings 
+#         --display-warnings
 #                         to print code warnings when testing doc
 #         --crate-version VERSION
 #                         crate version to print into documentation
-#         --sort-modules-by-appearance 
+#         --sort-modules-by-appearance
 #                         sort modules by where they appear in the program,
 #                         rather than alphabetically
 #         --default-theme THEME
@@ -345,7 +361,7 @@ test-cov: add-fmt add-grcov add-llvm add-target clean-cov fetch ## Test cov
 #         --error-format human|json|short
 #                         How errors and other messages are produced
 #         --json CONFIG   Configure the structure of JSON diagnostics
-#         --disable-minification 
+#         --disable-minification
 #                         Disable minification applied on JS files
 #     -W, --warn OPT      Set lint warnings
 #     -A, --allow OPT     Set lint allowed
@@ -357,31 +373,31 @@ test-cov: add-fmt add-grcov add-llvm add-target clean-cov fetch ## Test cov
 #                         `forbid` level.
 #         --index-page PATH
 #                         Markdown file to be used as index page
-#         --enable-index-page 
+#         --enable-index-page
 #                         To enable generation of the index page
 #         --static-root-path PATH
 #                         Path string to force loading static files from in
 #                         output pages. If not set, uses combinations of '../'
 #                         to reach the documentation root.
-#         --disable-per-crate-search 
+#         --disable-per-crate-search
 #                         disables generating the crate selector on the search
 #                         box
 #         --persist-doctests PATH
 #                         Directory to persist doctest executables into
-#         --show-coverage 
+#         --show-coverage
 #                         calculate percentage of public items with
 #                         documentation
-#         --enable-per-target-ignores 
+#         --enable-per-target-ignores
 #                         parse ignore-foo for ignoring doctests on a per-target
 #                         basis
 #         --runtool The tool to run tests with when building for a different target than host
-                        
+
 #         --runtool-arg One (of possibly many) arguments to pass to the runtool
-                        
+
 #         --test-builder PATH
 #                         The rustc-like binary to use as the test builder
 #         --check         Run rustdoc checks
-#         --generate-redirect-map 
+#         --generate-redirect-map
 #                         Generate JSON file at the top level instead of
 #                         generating HTML redirection files
 #         --print [unversioned-files]

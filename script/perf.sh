@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # STEP 0: Make sure there is no left-over profiling data from previous runs
-rm -rf /tmp/pgo-data
+rm -fr /tmp/pgo-data
 
 # STEP 1: Build the instrumented binaries
 RUSTFLAGS="-Cprofile-generate=/tmp/pgo-data" \
