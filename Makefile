@@ -38,19 +38,27 @@ CARGO_TEST = $(CARGO) test --all-features --all-targets --frozen --no-default-fe
 
 CARGO_AUDIT = $(CARGO) audit
 CARGO_CLIPPY = $(CARGO) clippy --all-features --all-targets --frozen --no-default-features --workspace -- -D warnings
+# CARGO_CONVENTIONAL_COMMITS_LINTER = conventional_commits_linter --allow-angular-type-only --from-stdin
+CARGO_CONVENTIONAL_COMMITS_LINTER = conventional_commits_linter --allow-angular-type-only --from-stdin
 CARGO_DENY = $(CARGO) deny --all-features --no-default-features --workspace
 CARGO_FMT = $(CARGO) fmt --package $(PACKAGE)
+CARGO_SPELLCHECK = $(CARGO) spellcheck --cfg .cargo/spellcheck.toml
 
 $(BIN): add-fmt add-target fetch
 	$(CARGO_BUILD)
 
 .PHONY: add-audit
 add-audit: ## Add the audit
-	$(CARGO) install --locked cargo-audit
+	$(CARGO) install cargo-audit
+	$(CARGO) generate-lockfile
 
 .PHONY: add-clippy
 add-clippy: ## Add the clippy
 	rustup component add clippy
+
+.PHONY: add-conventional-commits-linter
+add-conventional-commits-linter: ## Add the conventional commits linter
+	$(CARGO) install --locked conventional_commits_linter
 
 .PHONY: add-deny
 add-deny: ## Add the deny
@@ -72,11 +80,15 @@ add-llvm: ## Add the llvm tools preview
 add-target: ## Add a target
 	rustup target add $(TARGET)
 
+.PHONY: add-spellcheck
+add-spellcheck: ## Add a target
+	$(CARGO) install --locked cargo-spellcheck
+
 .PHONY: help
 help: ## Help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 		| sort \
-		| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+		| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s", $$1, $$2}'
 
 .PHONY: audit
 audit: add-audit ## Audit
@@ -122,6 +134,10 @@ clean-release: add-target ## Clean release
 .PHONY: clippy
 clippy: add-clippy add-fmt fetch ## Clippy
 	$(CARGO_CLIPPY)
+
+.PHONY: conventional-commits-linter
+conventional-commits-linter: add-conventional-commits-linter ## Conventional commits linter
+	$(CARGO_CONVENTIONAL_COMMITS_LINTER)
 
 .PHONY: deny-check
 deny-check: add-deny fetch ## Deny check
@@ -169,6 +185,10 @@ release: $(BIN) ## Release
 	shasum -a 256 release/$(BIN_NAME) \
 		| cut -d " " -f 1 > release/$(BIN_NAME).sha256
 
+.PHONY: spellcheck
+spellcheck: add-spellcheck ## Spellcheck
+	$(CARGO_SPELLCHECK)
+
 .PHONY: test
 test: add-fmt add-target fetch ## Test
 	$(CARGO_TEST)
@@ -187,6 +207,68 @@ test-cov: add-fmt add-grcov add-llvm add-target clean-cov fetch ## Test cov
 		--source-dir .
 	mkdir -p coverage
 	cp -R $(COVERAGE_DIR)/* coverage
+
+# # # # # # # # #
+#               #
+#   GIT HOOKS   #
+#               #
+# # # # # # # # #
+
+define COMMIT_MSG
+#!/bin/sh
+set -o errexit
+set -o pipefail
+cat "$${1}" | make conventional-commits-linter
+endef
+export COMMIT_MSG
+
+GIT_HOOKS_COMMIT_MSG = .git/hooks/commit-msg
+$(GIT_HOOKS_COMMIT_MSG):
+	@echo "+ add commit-msg"
+	@echo "$$COMMIT_MSG" > $@
+	@chmod 755 $@
+
+define PRE_COMMIT
+#!/bin/sh
+set -eu
+# make spellcheck -- -m 99 $$(git diff-index --cached --name-only --diff-filter=AM HEAD)
+make clippy fmt-check
+for LINE in $$(git diff --staged --name-status | grep .rs | grep -v 'D' | grep -v 'R'); do
+	FILE=$$(echo $$LINE | awk 'match($$0, /.*/) {print $$2}')
+	git add $$FILE
+done
+endef
+export PRE_COMMIT
+
+GIT_HOOKS_PRE_COMMIT = .git/hooks/pre-commit
+$(GIT_HOOKS_PRE_COMMIT):
+	@echo "+ add pre-commit"
+	@echo "$$PRE_COMMIT" > $@
+	@chmod 755 $@
+
+define PRE_PUSH
+#!/bin/sh
+set -e
+make audit deny-check check test
+endef
+export PRE_PUSH
+
+GIT_HOOKS_PRE_PUSH = .git/hooks/pre-push
+$(GIT_HOOKS_PRE_PUSH):
+	@echo "+ add pre-push"
+	@echo "$$PRE_PUSH" > $@
+	@chmod 755 $@
+
+GIT_HOOKS = $(GIT_HOOKS_COMMIT_MSG) $(GIT_HOOKS_PRE_COMMIT) $(GIT_HOOKS_PRE_PUSH)
+
+.PHONY: clean-git-hooks
+clean-git-hooks:
+	@echo "+ clean git-hooks"
+	@rm -fr $(GIT_HOOKS)
+
+.PHONY: git-hooks
+git-hooks: clean-git-hooks $(GIT_HOOKS)
+	@echo "+ installed"
 
 
 

@@ -17,7 +17,6 @@ tonic = { default-features = false, features = ["transport"], version = "0.5.0" 
 tracing-error = { default-features = false, version = "0.1.2" }
 
 [dev-dependencies]
-cargo-husky = { default-features = false, features = ["user-hooks"], version = "1.5.0" }
 # mockall = { default-features = false, features = ["user-hooks"], version = "0.10.1" }
 
 # [features]

@@ -43,7 +43,6 @@ tracing-opentelemetry = { default-features = false, features = ["tracing-log"], 
 tracing-subscriber = { default-features = false, features = ["env-filter", "fmt"], version = "0.2.19" }
 
 [dev-dependencies]
-cargo-husky = { default-features = false, features = ["user-hooks"], version = "1.5.0" }
 # mockall = { default-features = false, features = ["user-hooks"], version = "0.10.2" }
 
 # [features]
