@@ -90,11 +90,11 @@ test:fip_api:
   # needs:
   #   - "build:fip_api"
 
-coverage:fip_api:
+documentation:fip_api:
   dependencies:
     - "test:fip_api"
   extends:
-    - ".coverage"
+    - ".documentation"
     - ".fip_api"
   needs:
     - "test:fip_api"

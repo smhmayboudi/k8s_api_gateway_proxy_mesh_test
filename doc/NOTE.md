@@ -21,7 +21,6 @@ https://crates.io/crates/conventional_commits_next_version
 
 
 [commit]
-  gpgsign = true
   algorithm = minimal
   renames = copies
   tool = code

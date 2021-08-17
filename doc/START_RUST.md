@@ -2,7 +2,6 @@
 
 ```sh
 $ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-# از حالت پیش فرض نصب استفاده نمایید بخاطر اینکه یکسریی از کامپوننت ها در ورژن های راست موجود نیست.
 
 $ rustup show
 
@@ -16,7 +15,7 @@ $ rustup toolchain list
 $ rustup toolchain install nightly
 
 $ rustup target list
-$ rustup target add x86_64-apple-darwin
+$ rustup target add aarch64-apple-darwin
 
 $ rustup component list
 $ rustup +nightly component add \
@@ -54,18 +53,6 @@ $ cargo fix
 $ cargo generate-lockfile
 $ cargo init
 
-$ cargo install --list
-# $ cargo install --locked \
-#     cargo-audit \
-#     cargo-benchcmp \
-#     cargo-expand \
-#     cargo-readme \
-#     cargo-watch \
-#     flamegraph \
-#     grcov
-
-$ cargo uninstall
-
 $ cargo new
 $ cargo package
 $ cargo run
@@ -75,14 +62,20 @@ $ cargo tree
 $ cargo update
 $ cargo vendor
 
-# $ cargo audit
-# $ cargo benchcmp
-# $ cargo clippy
-# $ cargo expand
-# $ cargo fmt
-# $ cargo miri
-# $ cargo readme
-# $ cargo watch
+$ cargo clippy
+$ cargo fmt
+$ cargo miri
+
+$ cargo install --list
+$ cargo install --locked \
+    cargo-audit \
+    cargo-deny \
+    grcov
+$ cargo uninstall
+
+$ cargo audit
+$ cargo deny
+$ cargo grcov
 ```
 
 # PROJECT

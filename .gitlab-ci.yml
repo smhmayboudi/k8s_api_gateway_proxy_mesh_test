@@ -157,21 +157,33 @@ rust_build:
     VERSION: "${CI_COMMIT_TAG}"
   when: "manual"
 
-.coverage: &coverage
+.documentation: &documentation
   artifacts:
     expire_in: "1 week"
     paths:
-      - "public/${PACKAGE}"
-    # public: false
-  # extends:
-  #   - ".default-rule"
+      - "documentation"
   script:
-    - "rm -fr public/${PACKAGE}"
-    - "mkdir -p public/${PACKAGE}"
-    - "cp -R coverage public/${PACKAGE}"
-  stage: "coverage"
+    - "make doc"
+  stage: "documentation"
   variables:
     VERSION: "${CI_COMMIT_TAG}"
+  when: "manual"
+
+pages:
+  dependencies:
+    - "test:fip_api"
+    - "documentation:fip_api"
+  needs:
+    - "documentation:fip_api"
+    - "test:fip_api"
+  stage: pages
+  script:
+    - mkdir public
+    - mv coverage public
+    - mv documentation public
+  artifacts:
+    paths:
+      - public
   when: "manual"
 
 .deploy: &deploy
@@ -212,7 +224,8 @@ stages:
 - "upload"
 - "release"
 - "test"
-- "coverage"
+- "documentation"
+- "pages"
 - "deploy"
 
 include:

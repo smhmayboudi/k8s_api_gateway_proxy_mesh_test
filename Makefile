@@ -37,12 +37,12 @@ CARGO_RUN = $(CARGO) run --all-features --frozen --no-default-features --package
 CARGO_TEST = $(CARGO) test --all-features --all-targets --frozen --no-default-features --package $(PACKAGE) $(RELEASE) --target $(TARGET)
 
 CARGO_AUDIT = $(CARGO) audit
-CARGO_CLIPPY = $(CARGO) clippy --all-features --all-targets --frozen --no-default-features --workspace -- -D warnings
-# CARGO_CONVENTIONAL_COMMITS_LINTER = conventional_commits_linter --allow-angular-type-only --from-stdin
-CARGO_CONVENTIONAL_COMMITS_LINTER = conventional_commits_linter --allow-angular-type-only --from-stdin
+CARGO_CLIPPY = $(CARGO) clippy --all-features --all-targets --frozen --no-default-features --workspace -- --deny warnings
 CARGO_DENY = $(CARGO) deny --all-features --no-default-features --workspace
 CARGO_FMT = $(CARGO) fmt --package $(PACKAGE)
-CARGO_SPELLCHECK = $(CARGO) spellcheck --cfg .cargo/spellcheck.toml
+
+COMMITS_LINTER = conventional_commits_linter --allow-angular-type-only --from-stdin
+HUNSPELL = hunspell -d en_US -l
 
 $(BIN): add-fmt add-target fetch
 	$(CARGO_BUILD)
@@ -80,15 +80,17 @@ add-llvm: ## Add the llvm tools preview
 add-target: ## Add a target
 	rustup target add $(TARGET)
 
-.PHONY: add-spellcheck
-add-spellcheck: ## Add a target
-	$(CARGO) install --locked cargo-spellcheck
+.PHONY: add-hunspell
+add-hunspell: ## Add the hunspell
+	brew install hunspell
+	curl -sSLo en_US.aff https://cgit.freedesktop.org/libreoffice/dictionaries/plain/en/en_US.aff?id=a4473e06b56bfe35187e302754f6baaa8d75e54f
+	curl -sSLo en_US.dic https://cgit.freedesktop.org/libreoffice/dictionaries/plain/en/en_US.dic?id=a4473e06b56bfe35187e302754f6baaa8d75e54f
 
 .PHONY: help
 help: ## Help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 		| sort \
-		| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s", $$1, $$2}'
+		| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-33s\033[0m %s\n", $$1, $$2}'
 
 .PHONY: audit
 audit: add-audit ## Audit
@@ -99,7 +101,7 @@ bench: add-fmt add-target fetch ## Bench
 	$(CARGO_BENCH)
 
 .PHONY: build
-build: $(BIN) ## Build
+build: clean-build $(BIN) ## Build
 
 .PHONY: check
 check: add-fmt add-target fetch ## Check
@@ -137,7 +139,7 @@ clippy: add-clippy add-fmt fetch ## Clippy
 
 .PHONY: conventional-commits-linter
 conventional-commits-linter: add-conventional-commits-linter ## Conventional commits linter
-	$(CARGO_CONVENTIONAL_COMMITS_LINTER)
+	$(COMMITS_LINTER)
 
 .PHONY: deny-check
 deny-check: add-deny fetch ## Deny check
@@ -152,7 +154,7 @@ deny-fix: add-deny fetch ## Deny fix
 	$(CARGO_DENY) fix
 
 .PHONY: doc
-doc: add-fmt add-target fetch ## Doc
+doc: add-fmt add-target clean-doc fetch ## Doc
 	$(CARGO_DOC)
 	mkdir -p documentation
 	cp -R $(DOCUMENTATION_DIR)/* documentation
@@ -164,6 +166,10 @@ fetch: Cargo.lock ## Fetch
 .PHONY: fix
 fix: ## Fix
 	$(CARGO_FIX)
+
+.PHONY: hunspell
+hunspell: add-hunspell ## Hunspell
+	$(HUNSPELL)
 
 .PHONY: run
 run: ## Run
@@ -185,10 +191,6 @@ release: $(BIN) ## Release
 	shasum -a 256 release/$(BIN_NAME) \
 		| cut -d " " -f 1 > release/$(BIN_NAME).sha256
 
-.PHONY: spellcheck
-spellcheck: add-spellcheck ## Spellcheck
-	$(CARGO_SPELLCHECK)
-
 .PHONY: test
 test: add-fmt add-target fetch ## Test
 	$(CARGO_TEST)
@@ -201,12 +203,59 @@ test-cov: add-fmt add-grcov add-llvm add-target clean-cov fetch ## Test cov
 		--binary-path $(BIN_DIR) \
 		--branch \
 		--guess-directory-when-missing \
+		--ignore "/*" \
 		--ignore-not-existing \
 		--output-path $(COVERAGE_DIR) \
 		--output-type html \
 		--source-dir .
+	grcov . \
+		--binary-path $(BIN_DIR) \
+		--branch \
+		--guess-directory-when-missing \
+		--ignore "/*" \
+		--ignore-not-existing \
+		--output-path $(COVERAGE_DIR)/lcov.info \
+		--output-type lcov \
+		--source-dir .
 	mkdir -p coverage
 	cp -R $(COVERAGE_DIR)/* coverage
+
+# # # # # #
+#         #
+#   GIT   #
+#         #
+# # # # # #
+
+.PHONY: git
+git: add-git-config add-git-hooks ## Add git configs
+
+# # # # # # # # # #
+#                 #
+#   GIT CONFIGS   #
+#                 #
+# # # # # # # # # #
+
+.PHONY: add-git-config
+add-git-config: ## Add git configs
+	@echo "+ add git-configs"
+	@git config --global branch.autoSetupRebase always
+	@git config --global color.branch true
+	@git config --global color.diff true
+	@git config --global color.interactive true
+	@git config --global color.status true
+	@git config --global color.ui true
+	@git config --global commit.gpgSign true
+	@git config --global core.editor "code --wait"
+	@git config --global difftool.code.cmd "code --diff \$$LOCAL \$$REMOTE --wait"
+	@git config --global gpg.program gpg
+	@git config --global init.defaultBranch main
+	@git config --global log.date relative
+	@git config --global pull.default current
+	@git config --global pull.rebase true
+	@git config --global push.default current
+	@git config --global rebase.autoStash true
+	@git config --global rerere.enabled true
+	@git config --global stash.showPatch true
 
 # # # # # # # # #
 #               #
@@ -218,7 +267,8 @@ define COMMIT_MSG
 #!/bin/sh
 set -o errexit
 set -o pipefail
-cat "$${1}" | make conventional-commits-linter
+# cat $${1} | make hunspell
+cat $${1} | make conventional-commits-linter
 endef
 export COMMIT_MSG
 
@@ -231,7 +281,9 @@ $(GIT_HOOKS_COMMIT_MSG):
 define PRE_COMMIT
 #!/bin/sh
 set -eu
-# make spellcheck -- -m 99 $$(git diff-index --cached --name-only --diff-filter=AM HEAD)
+# for FILE in $$(git diff-index --cached --name-only --diff-filter=AM HEAD); do
+# 	cat $$FILE | make hunspell
+# done
 make clippy fmt-check
 for LINE in $$(git diff --staged --name-status | grep .rs | grep -v 'D' | grep -v 'R'); do
 	FILE=$$(echo $$LINE | awk 'match($$0, /.*/) {print $$2}')
@@ -261,14 +313,14 @@ $(GIT_HOOKS_PRE_PUSH):
 
 GIT_HOOKS = $(GIT_HOOKS_COMMIT_MSG) $(GIT_HOOKS_PRE_COMMIT) $(GIT_HOOKS_PRE_PUSH)
 
+.PHONY: add-git-hooks
+add-git-hooks: clean-git-hooks $(GIT_HOOKS) ## Add git hooks
+	@echo "+ add git-hooks"
+
 .PHONY: clean-git-hooks
-clean-git-hooks:
+clean-git-hooks: ## Clean git hooks
 	@echo "+ clean git-hooks"
 	@rm -fr $(GIT_HOOKS)
-
-.PHONY: git-hooks
-git-hooks: clean-git-hooks $(GIT_HOOKS)
-	@echo "+ installed"
 
 
 
