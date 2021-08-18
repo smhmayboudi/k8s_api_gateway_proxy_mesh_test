@@ -40,7 +40,7 @@ tracing-appender = { default-features = false, version = "0.1.2" }
 tracing-bunyan-formatter = { default-features = false, version = "0.2.4" }
 tracing-error = { default-features = false, version = "0.1.2" }
 tracing-opentelemetry = { default-features = false, features = ["tracing-log"], version = "0.14.0" }
-tracing-subscriber = { default-features = false, features = ["env-filter", "fmt"], version = "0.2.19" }
+tracing-subscriber = { default-features = false, features = ["env-filter", "fmt"], version = "0.2.20" }
 
 [dev-dependencies]
 # mockall = { default-features = false, features = ["user-hooks"], version = "0.10.2" }
