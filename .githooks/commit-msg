@@ -1,5 +1,12 @@
 #!/bin/sh
-set -o errexit
-set -o pipefail
-# cat ${1} | make hunspell
+
+set -eu
+# set -o errexit
+# set -o pipefail
+
+test "$(cat ${1} | make hunspell | sort | uniq -c)" == "" || {
+    echo >&2 "hunspell found (a) misspelled word(s) on ${1}"
+	exit 1
+}
+
 cat ${1} | make conventional-commits-linter

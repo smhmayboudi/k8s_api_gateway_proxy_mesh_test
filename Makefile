@@ -41,8 +41,8 @@ CARGO_CLIPPY = $(CARGO) clippy --all-features --all-targets --frozen --no-defaul
 CARGO_DENY = $(CARGO) deny --all-features --no-default-features --workspace
 CARGO_FMT = $(CARGO) fmt --package $(PACKAGE)
 
-COMMITS_LINTER = conventional_commits_linter --allow-angular-type-only --from-stdin
-HUNSPELL = hunspell -d en_US -l
+CONVENTIONAL_COMMITS_LINTER = conventional_commits_linter --allow-angular-type-only --from-stdin
+HUNSPELL = hunspell -d en_US -i utf-8 -l
 
 $(BIN): add-fmt add-target fetch
 	$(CARGO_BUILD)
@@ -51,16 +51,6 @@ $(BIN): add-fmt add-target fetch
 add-audit: ## Add the audit
 	$(CARGO) install cargo-audit
 	$(CARGO) generate-lockfile
-
-.PHONY: add-brew
-add-brew:  ## Add brew
-	@if [ $$(command -v brew) == "" ]; then\
-        echo "Installing Hombrew";\
-		/usr/bin/ruby -e "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)";\
-	else\
-		echo "Upgrading & updating & cleaning up Homebrew";\
-		brew upgrade && brew update && brew cleanup;\
-    fi
 
 .PHONY: add-clippy
 add-clippy: ## Add the clippy
@@ -91,15 +81,14 @@ add-target: ## Add a target
 	rustup target add $(TARGET)
 
 .PHONY: add-hunspell
-add-hunspell: add-brew add-hunspell-dictionary ## Add the hunspell
-	brew install hunspell
+add-hunspell: add-hunspell-dictionary ## Add the hunspell
+	@brew install --quiet hunspell
 
 HUNSPELL_DICTIONARY ?= en_US
 
 .PHONY: add-hunspell-dictionary
 add-hunspell-dictionary: ## Add the hunspell dictionary
 	@if [ ! -f "$(HUNSPELL_DICTIONARY).dic" ]; then\
-        echo "Installing ${HUNSPELL_DICTIONARY} dictionary";\
 		curl -sSLo $(HUNSPELL_DICTIONARY).aff https://cgit.freedesktop.org/libreoffice/dictionaries/plain/en/$(HUNSPELL_DICTIONARY).aff?id=a4473e06b56bfe35187e302754f6baaa8d75e54f;\
 		curl -sSLo $(HUNSPELL_DICTIONARY).dic https://cgit.freedesktop.org/libreoffice/dictionaries/plain/en/$(HUNSPELL_DICTIONARY).dic?id=a4473e06b56bfe35187e302754f6baaa8d75e54f;\
 	fi
@@ -157,7 +146,7 @@ clippy: add-clippy add-fmt fetch ## Clippy
 
 .PHONY: conventional-commits-linter
 conventional-commits-linter: add-conventional-commits-linter ## Conventional commits linter
-	$(COMMITS_LINTER)
+	$(CONVENTIONAL_COMMITS_LINTER)
 
 .PHONY: deny-check
 deny-check: add-deny fetch ## Deny check
@@ -187,7 +176,7 @@ fix: ## Fix
 
 .PHONY: hunspell
 hunspell: add-hunspell ## Hunspell
-	$(HUNSPELL)
+	@$(HUNSPELL)
 
 .PHONY: run
 run: ## Run
@@ -246,56 +235,49 @@ test-cov: add-fmt add-grcov add-llvm add-target clean-cov fetch ## Test cov
 
 GIT_HOOKS_COMMIT_MSG = .git/hooks/commit-msg
 $(GIT_HOOKS_COMMIT_MSG):
-	@echo "+ add commit-msg"
-	@cp .githooks/commit-msg $@
+	cp .githooks/commit-msg $@
 
 GIT_HOOKS_PRE_COMMIT = .git/hooks/pre-commit
 $(GIT_HOOKS_PRE_COMMIT):
-	@echo "+ add pre-commit"
-	@cp .githooks/pre-commit $@
+	cp .githooks/pre-commit $@
 
 GIT_HOOKS_PRE_PUSH = .git/hooks/pre-push
 $(GIT_HOOKS_PRE_PUSH):
-	@echo "+ add pre-push"
-	@cp .githooks/pre-push $@
+	cp .githooks/pre-push $@
 
 GIT_HOOKS_PREPARE_COMMIT_MSG = .git/hooks/prepare-commit-msg
 $(GIT_HOOKS_PREPARE_COMMIT_MSG):
-	@echo "+ add prepare-commit-msg"
-	@cp .githooks/prepare-commit-msg $@
+	cp .githooks/prepare-commit-msg $@
 
 GIT_HOOKS = $(GIT_HOOKS_COMMIT_MSG) $(GIT_HOOKS_PRE_COMMIT) $(GIT_HOOKS_PRE_PUSH) $(GIT_HOOKS_PREPARE_COMMIT_MSG)
 
 .PHONY: add-git-config
 add-git-config: ## Add git configs
-	@echo "+ add git-configs"
-	@git config --global branch.autoSetupRebase always
-	@git config --global color.branch true
-	@git config --global color.diff true
-	@git config --global color.interactive true
-	@git config --global color.status true
-	@git config --global color.ui true
-	@git config --global commit.gpgSign true
-	@git config --global core.editor "code --wait"
-	@git config --global difftool.code.cmd "code --diff \$$LOCAL \$$REMOTE --wait"
-	@git config --global gpg.program gpg
-	@git config --global init.defaultBranch main
-	@git config --global log.date relative
-	@git config --global pull.default current
-	@git config --global pull.rebase true
-	@git config --global push.default current
-	@git config --global rebase.autoStash true
-	@git config --global rerere.enabled true
-	@git config --global stash.showPatch true
+	git config --global branch.autoSetupRebase always
+	git config --global color.branch true
+	git config --global color.diff true
+	git config --global color.interactive true
+	git config --global color.status true
+	git config --global color.ui true
+	git config --global commit.gpgSign true
+	git config --global core.editor "code --wait"
+	git config --global difftool.code.cmd "code --diff \$$LOCAL \$$REMOTE --wait"
+	git config --global gpg.program gpg
+	git config --global init.defaultBranch main
+	git config --global log.date relative
+	git config --global pull.default current
+	git config --global pull.rebase true
+	git config --global push.default current
+	git config --global rebase.autoStash true
+	git config --global rerere.enabled true
+	git config --global stash.showPatch true
 
 .PHONY: add-git-hooks
 add-git-hooks: clean-git-hooks $(GIT_HOOKS) ## Add git hooks
-	@echo "+ add git-hooks"
 
 .PHONY: clean-git-hooks
 clean-git-hooks: ## Clean git hooks
-	@echo "+ clean git-hooks"
-	@rm -fr $(GIT_HOOKS)
+	rm -fr $(GIT_HOOKS)
 
 .PHONY: git
 git: add-git-config add-git-hooks ## Add git configs
