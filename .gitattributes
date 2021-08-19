@@ -1,0 +1,5 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# RS files must always use LF for tools to work
+*.rs eol=lf

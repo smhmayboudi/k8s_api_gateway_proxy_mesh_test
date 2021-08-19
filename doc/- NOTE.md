@@ -15,10 +15,7 @@ conventional-commits-next-version-checking:
     rules:
         - if: $CI_MERGE_REQUEST_ID
 
-
 https://crates.io/crates/conventional_commits_next_version
-
-
 
 [commit]
   algorithm = minimal

@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+# for FILE in $(git diff-index --cached --name-only --diff-filter=AM HEAD); do
+# 	cat $FILE | make hunspell
+# done
+make clippy fmt-check
+for LINE in $(git diff --staged --name-status | grep .rs | grep -v 'D' | grep -v 'R'); do
+	FILE=$(echo $LINE | awk 'match($0, /.*/) {print $2}')
+	git add $FILE
+done

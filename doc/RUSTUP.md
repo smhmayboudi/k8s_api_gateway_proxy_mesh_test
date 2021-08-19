@@ -1,5 +1,7 @@
 # RUSTUP
 
+## RUSTUP
+
 ```sh
 $ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
@@ -37,7 +39,7 @@ $ rustup doc
 $ rustup man
 ```
 
-# CREATE
+## CREATE
 
 ```sh
 $ cargo --list
@@ -78,7 +80,7 @@ $ cargo deny
 $ cargo grcov
 ```
 
-# PROJECT
+## PROJECT
 
 ```sh
 $ cargo new --bin rust_bin_test

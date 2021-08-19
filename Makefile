@@ -52,6 +52,16 @@ add-audit: ## Add the audit
 	$(CARGO) install cargo-audit
 	$(CARGO) generate-lockfile
 
+.PHONY: add-brew
+add-brew:  ## Add brew
+	@if [ $$(command -v brew) == "" ]; then\
+        echo "Installing Hombrew";\
+		/usr/bin/ruby -e "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)";\
+	else\
+		echo "Upgrading & updating & cleaning up Homebrew";\
+		brew upgrade && brew update && brew cleanup;\
+    fi
+
 .PHONY: add-clippy
 add-clippy: ## Add the clippy
 	rustup component add clippy
@@ -81,10 +91,18 @@ add-target: ## Add a target
 	rustup target add $(TARGET)
 
 .PHONY: add-hunspell
-add-hunspell: ## Add the hunspell
+add-hunspell: add-brew add-hunspell-dictionary ## Add the hunspell
 	brew install hunspell
-	curl -sSLo en_US.aff https://cgit.freedesktop.org/libreoffice/dictionaries/plain/en/en_US.aff?id=a4473e06b56bfe35187e302754f6baaa8d75e54f
-	curl -sSLo en_US.dic https://cgit.freedesktop.org/libreoffice/dictionaries/plain/en/en_US.dic?id=a4473e06b56bfe35187e302754f6baaa8d75e54f
+
+HUNSPELL_DICTIONARY ?= en_US
+
+.PHONY: add-hunspell-dictionary
+add-hunspell-dictionary: ## Add the hunspell dictionary
+	@if [ ! -f "$(HUNSPELL_DICTIONARY).dic" ]; then\
+        echo "Installing ${HUNSPELL_DICTIONARY} dictionary";\
+		curl -sSLo $(HUNSPELL_DICTIONARY).aff https://cgit.freedesktop.org/libreoffice/dictionaries/plain/en/$(HUNSPELL_DICTIONARY).aff?id=a4473e06b56bfe35187e302754f6baaa8d75e54f;\
+		curl -sSLo $(HUNSPELL_DICTIONARY).dic https://cgit.freedesktop.org/libreoffice/dictionaries/plain/en/$(HUNSPELL_DICTIONARY).dic?id=a4473e06b56bfe35187e302754f6baaa8d75e54f;\
+	fi
 
 .PHONY: help
 help: ## Help
@@ -226,14 +244,27 @@ test-cov: add-fmt add-grcov add-llvm add-target clean-cov fetch ## Test cov
 #         #
 # # # # # #
 
-.PHONY: git
-git: add-git-config add-git-hooks ## Add git configs
+GIT_HOOKS_COMMIT_MSG = .git/hooks/commit-msg
+$(GIT_HOOKS_COMMIT_MSG):
+	@echo "+ add commit-msg"
+	@cp .githooks/commit-msg $@
 
-# # # # # # # # # #
-#                 #
-#   GIT CONFIGS   #
-#                 #
-# # # # # # # # # #
+GIT_HOOKS_PRE_COMMIT = .git/hooks/pre-commit
+$(GIT_HOOKS_PRE_COMMIT):
+	@echo "+ add pre-commit"
+	@cp .githooks/pre-commit $@
+
+GIT_HOOKS_PRE_PUSH = .git/hooks/pre-push
+$(GIT_HOOKS_PRE_PUSH):
+	@echo "+ add pre-push"
+	@cp .githooks/pre-push $@
+
+GIT_HOOKS_PREPARE_COMMIT_MSG = .git/hooks/prepare-commit-msg
+$(GIT_HOOKS_PREPARE_COMMIT_MSG):
+	@echo "+ add prepare-commit-msg"
+	@cp .githooks/prepare-commit-msg $@
+
+GIT_HOOKS = $(GIT_HOOKS_COMMIT_MSG) $(GIT_HOOKS_PRE_COMMIT) $(GIT_HOOKS_PRE_PUSH) $(GIT_HOOKS_PREPARE_COMMIT_MSG)
 
 .PHONY: add-git-config
 add-git-config: ## Add git configs
@@ -257,62 +288,6 @@ add-git-config: ## Add git configs
 	@git config --global rerere.enabled true
 	@git config --global stash.showPatch true
 
-# # # # # # # # #
-#               #
-#   GIT HOOKS   #
-#               #
-# # # # # # # # #
-
-define COMMIT_MSG
-#!/bin/sh
-set -o errexit
-set -o pipefail
-# cat $${1} | make hunspell
-cat $${1} | make conventional-commits-linter
-endef
-export COMMIT_MSG
-
-GIT_HOOKS_COMMIT_MSG = .git/hooks/commit-msg
-$(GIT_HOOKS_COMMIT_MSG):
-	@echo "+ add commit-msg"
-	@echo "$$COMMIT_MSG" > $@
-	@chmod 755 $@
-
-define PRE_COMMIT
-#!/bin/sh
-set -eu
-# for FILE in $$(git diff-index --cached --name-only --diff-filter=AM HEAD); do
-# 	cat $$FILE | make hunspell
-# done
-make clippy fmt-check
-for LINE in $$(git diff --staged --name-status | grep .rs | grep -v 'D' | grep -v 'R'); do
-	FILE=$$(echo $$LINE | awk 'match($$0, /.*/) {print $$2}')
-	git add $$FILE
-done
-endef
-export PRE_COMMIT
-
-GIT_HOOKS_PRE_COMMIT = .git/hooks/pre-commit
-$(GIT_HOOKS_PRE_COMMIT):
-	@echo "+ add pre-commit"
-	@echo "$$PRE_COMMIT" > $@
-	@chmod 755 $@
-
-define PRE_PUSH
-#!/bin/sh
-set -e
-make audit deny-check check test
-endef
-export PRE_PUSH
-
-GIT_HOOKS_PRE_PUSH = .git/hooks/pre-push
-$(GIT_HOOKS_PRE_PUSH):
-	@echo "+ add pre-push"
-	@echo "$$PRE_PUSH" > $@
-	@chmod 755 $@
-
-GIT_HOOKS = $(GIT_HOOKS_COMMIT_MSG) $(GIT_HOOKS_PRE_COMMIT) $(GIT_HOOKS_PRE_PUSH)
-
 .PHONY: add-git-hooks
 add-git-hooks: clean-git-hooks $(GIT_HOOKS) ## Add git hooks
 	@echo "+ add git-hooks"
@@ -321,6 +296,9 @@ add-git-hooks: clean-git-hooks $(GIT_HOOKS) ## Add git hooks
 clean-git-hooks: ## Clean git hooks
 	@echo "+ clean git-hooks"
 	@rm -fr $(GIT_HOOKS)
+
+.PHONY: git
+git: add-git-config add-git-hooks ## Add git configs
 
 
 
