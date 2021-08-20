@@ -37,6 +37,7 @@ default:
 rust_build:
   after_script:
     - "docker logout ${HARBOR_REGISTRY_URL}"
+  allow_failure: false
   before_script:
     - "echo -n \"${HARBOR_PASSWORD}\" \
       | docker login --password-stdin ${HARBOR_REGISTRY_URL} --username ${HARBOR_USERNAME}"
@@ -44,9 +45,11 @@ rust_build:
   # extends:
   #   - ".default-rule"
   image: "${HARBOR_REGISTRY_URL}/proxy_cache/library/docker:18.09.9-git"
+  needs: []
   script:
     - "docker pull ${HARBOR_REGISTRY_URL}/library/rust-build:${RUST_VERSION} || true"
-    - "docker build --build-arg RUST_VERSION=${RUST_VERSION} \
+    - "docker build \
+      --build-arg RUST_VERSION=${RUST_VERSION} \
       --cache-from ${HARBOR_REGISTRY_URL}/library/rust-build:${RUST_VERSION} \
       --pull \
       --tag ${HARBOR_REGISTRY_URL}/library/rust-build:${RUST_VERSION} \
@@ -57,11 +60,14 @@ rust_build:
   stage: "rust_build"
   variables:
     DOCKER_DRIVER: "overlay2"
-    DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: "tcp://localhost:2375"
+    DOCKER_TLS_CERTDIR: ""
+    RUST_VERSION: "1.54.0-buster"
+    VERSION: "${CI_COMMIT_TAG}"
   when: "manual"
 
 .build: &build
+  allow_failure: false
   artifacts:
     expire_in: "1 week"
     paths:
@@ -78,13 +84,15 @@ rust_build:
     DOCKER_DRIVER: "overlay2"
     DOCKER_HOST: "tcp://localhost:2375"
     DOCKER_TLS_CERTDIR: ""
+    RUST_VERSION: "1.54.0-buster"
     VERSION: "${CI_COMMIT_TAG}"
   when: "manual"
 
 .upload: &upload
+  allow_failure: false
   # extends:
   #   - ".default-rule"
-  image: curlimages/curl:7.78.0
+  image: "curlimages/curl:7.78.0"
   script:
     - "curl \
       --header \"JOB-TOKEN: ${CI_JOB_TOKEN}\" \
@@ -97,10 +105,12 @@ rust_build:
   stage: "upload"
   variables:
     PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PACKAGE}/${VERSION}"
+    RUST_VERSION: "1.54.0-buster"
     VERSION: "${CI_COMMIT_TAG}"
   when: "manual"
 
 .release: &release
+  allow_failure: false
   # extends:
   #   - ".default-rule"
   image: "registry.gitlab.com/gitlab-org/release-cli:latest"
@@ -139,10 +149,35 @@ rust_build:
   stage: "release"
   variables:
     PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PACKAGE}/${VERSION}"
+    RUST_VERSION: "1.54.0-buster"
     VERSION: "${CI_COMMIT_TAG}"
   when: "manual"
 
 .test: &test
+  allow_failure: false
+  artifacts:
+    expire_in: "1 week"
+    paths:
+      - "test"
+    # public: false
+    reports:
+      junit: "test/results.xml"
+    when: "always"
+  # extends:
+  #   - ".default-rule"
+  script:
+    - "cargo install --locked cargo2junit"
+    - "mkdir -p test"
+    - "make test | tee test/results.json"
+    - "cat test/results.json | cargo2junit > test/results.xml"
+  stage: "test"
+  variables:
+    RUST_VERSION: "1.54.0-buster"
+    VERSION: "${CI_COMMIT_TAG}"
+  when: "manual"
+
+.coverage: &coverage
+  allow_failure: true
   artifacts:
     expire_in: "1 week"
     paths:
@@ -152,41 +187,49 @@ rust_build:
   #   - ".default-rule"
   script:
     - "make test-cov"
-  stage: "test"
+  stage: "coverage"
   variables:
+    RUST_VERSION: "1.54.0-buster"
     VERSION: "${CI_COMMIT_TAG}"
   when: "manual"
 
 .documentation: &documentation
+  allow_failure: false
   artifacts:
     expire_in: "1 week"
     paths:
       - "documentation"
+    # public: false
+  # extends:
+  #   - ".default-rule"
   script:
     - "make doc"
   stage: "documentation"
   variables:
+    RUST_VERSION: "1.54.0-buster"
     VERSION: "${CI_COMMIT_TAG}"
   when: "manual"
 
-pages:
-  dependencies:
-    - "test:fip_api"
-    - "documentation:fip_api"
-  needs:
-    - "documentation:fip_api"
-    - "test:fip_api"
-  stage: pages
-  script:
-    - mkdir public
-    - mv coverage public
-    - mv documentation public
+.pages:
+  allow_failure: false
   artifacts:
     paths:
-      - public
+      - "public"
+    # public: false
+  # extends:
+  #   - ".default-rule"
+  script:
+    - "mkdir public"
+    - "mv coverage public"
+    - "mv documentation public"
+  stage: "pages"
+  variables:
+    RUST_VERSION: "1.54.0-buster"
+    VERSION: "${CI_COMMIT_TAG}"
   when: "manual"
 
 .deploy: &deploy
+  allow_failure: false
   # extends:
   #   - ".default-rule"
   image: "docker:20.10.7"
@@ -207,6 +250,7 @@ pages:
     DOCKER_TLS_CERTDIR: ""
     # MOUNT_POINT: /builds/${CI_PROJECT_PATH}/mnt
     # MOUNT_POINT: "${CI_PROJECT_DIR}/mnt"
+    RUST_VERSION: "1.54.0-buster"
     VERSION: "${CI_COMMIT_TAG}"
   when: "manual"
 
@@ -224,6 +268,7 @@ stages:
 - "upload"
 - "release"
 - "test"
+- "coverage"
 - "documentation"
 - "pages"
 - "deploy"
