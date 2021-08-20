@@ -200,12 +200,12 @@ release: $(BIN) ## Release
 
 .PHONY: test
 test: add-fmt add-target fetch ## Test
-	$(CARGO_TEST)
+	$(CARGO_TEST) $(filter-out $@,$(MAKECMDGOALS))
 
 .PHONY: test-cov
 test-cov: add-fmt add-grcov add-llvm add-target clean-cov fetch ## Test cov
 	RUSTC_BOOTSTRAP=1 RUSTFLAGS="-Zinstrument-coverage" $(CARGO_BUILD)
-	RUSTC_BOOTSTRAP=1 RUSTFLAGS="-Zinstrument-coverage" $(CARGO_TEST)
+	RUSTC_BOOTSTRAP=1 RUSTFLAGS="-Zinstrument-coverage" LLVM_PROFILE_FILE="$(PACKAGE)-%p-%m.profraw" $(CARGO_TEST)
 	grcov . \
 		--binary-path $(BIN_DIR) \
 		--branch \
@@ -215,17 +215,9 @@ test-cov: add-fmt add-grcov add-llvm add-target clean-cov fetch ## Test cov
 		--output-path $(COVERAGE_DIR) \
 		--output-type html \
 		--source-dir .
-	grcov . \
-		--binary-path $(BIN_DIR) \
-		--branch \
-		--guess-directory-when-missing \
-		--ignore "/*" \
-		--ignore-not-existing \
-		--output-path $(COVERAGE_DIR)/lcov.info \
-		--output-type lcov \
-		--source-dir .
 	mkdir -p coverage
 	cp -R $(COVERAGE_DIR)/* coverage
+	cat coverage/coverage.json
 
 # # # # # #
 #         #

@@ -21,6 +21,7 @@ build_1:fip_api:
     - ".build"
     - ".fip_api"
     - ".target_1"
+  needs: []
 
 upload_1:fip_api:
   dependencies:
@@ -40,6 +41,7 @@ build_2:fip_api:
     - ".build"
     - ".fip_api"
     - ".target_2"
+  needs: []
 
 upload_2:fip_api:
   dependencies:
@@ -59,6 +61,7 @@ build_3:fip_api:
     - ".build"
     - ".fip_api"
     - ".target_3"
+  needs: []
 
 upload_3:fip_api:
   dependencies:
@@ -87,17 +90,32 @@ test:fip_api:
   extends:
     - ".test"
     - ".fip_api"
-  # needs:
-  #   - "build:fip_api"
+  needs: []
+
+coverage:fip_api:
+  dependencies: []
+  extends:
+    - ".coverage"
+    - ".fip_api"
+  needs: []
 
 documentation:fip_api:
-  dependencies:
-    - "test:fip_api"
+  dependencies: []
   extends:
     - ".documentation"
     - ".fip_api"
+  needs: []
+
+pages:fip_api:
+  dependencies:
+    - "coverage:fip_api"
+    - "documentation:fip_api"
+  extends:
+    - ".pages"
+    - ".fip_api"
   needs:
-    - "test:fip_api"
+    - "coverage:fip_api"
+    - "documentation:fip_api"
 
 deploy:fip_api:
   dependencies: []
