@@ -114,8 +114,25 @@ build: clean-build $(BIN) ## Build
 check: add-fmt add-target fetch ## Check
 	$(CARGO_CHECK)
 
+.PHONY: coverage
+coverage: add-fmt add-grcov add-llvm add-target clean-coverage fetch ## Test cov
+	RUSTC_BOOTSTRAP=1 RUSTFLAGS="-Zinstrument-coverage" $(CARGO_BUILD)
+	RUSTC_BOOTSTRAP=1 RUSTFLAGS="-Zinstrument-coverage" LLVM_PROFILE_FILE="$(PACKAGE)-%p-%m.profraw" $(CARGO_TEST)
+	grcov . \
+		--binary-path $(BIN_DIR) \
+		--branch \
+		--guess-directory-when-missing \
+		--ignore "/*" \
+		--ignore-not-existing \
+		--output-path $(COVERAGE_DIR) \
+		--output-type html \
+		--source-dir .
+	mkdir -p coverage
+	cp -R $(COVERAGE_DIR)/* coverage
+	cat coverage/coverage.json
+
 .PHONY: clean
-clean: clean-build clean-cov clean-doc clean-release ## Clean
+clean: clean-build clean-coverage clean-doc clean-release ## Clean
 	rm -fr target
 
 .PHONY: clean-build
@@ -123,8 +140,8 @@ clean-build: add-target ## Clean build
 	$(CARGO_CLEAN)
 	rm -fr $(BIN_DIR)
 
-.PHONY: clean-cov
-clean-cov: add-target ## Clean cov
+.PHONY: clean-coverage
+clean-coverage: add-target ## Clean cov
 	find . -name "*.profdata" -exec rm -fr {} +
 	find . -name "*.profraw" -exec rm -fr {} +
 	rm -fr $(COVERAGE_DIR)
@@ -200,24 +217,7 @@ release: $(BIN) ## Release
 
 .PHONY: test
 test: add-fmt add-target fetch ## Test
-	$(CARGO_TEST) $(filter-out $@,$(MAKECMDGOALS))
-
-.PHONY: test-cov
-test-cov: add-fmt add-grcov add-llvm add-target clean-cov fetch ## Test cov
-	RUSTC_BOOTSTRAP=1 RUSTFLAGS="-Zinstrument-coverage" $(CARGO_BUILD)
-	RUSTC_BOOTSTRAP=1 RUSTFLAGS="-Zinstrument-coverage" LLVM_PROFILE_FILE="$(PACKAGE)-%p-%m.profraw" $(CARGO_TEST)
-	grcov . \
-		--binary-path $(BIN_DIR) \
-		--branch \
-		--guess-directory-when-missing \
-		--ignore "/*" \
-		--ignore-not-existing \
-		--output-path $(COVERAGE_DIR) \
-		--output-type html \
-		--source-dir .
-	mkdir -p coverage
-	cp -R $(COVERAGE_DIR)/* coverage
-	cat coverage/coverage.json
+	$(CARGO_TEST)
 
 # # # # # #
 #         #
@@ -272,7 +272,7 @@ clean-git-hooks: ## Clean git hooks
 	rm -fr $(GIT_HOOKS)
 
 .PHONY: git
-git: add-git-config add-git-hooks ## Add git configs
+git: add-git-config add-git-hooks ## Add git config & hooks
 
 
 

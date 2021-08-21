@@ -346,3 +346,9 @@ $ perf report --hierarchy -M intel
 
 $ RUSTFLAGS="-C target-cpu=native" cargo build --release
 ```
+
+
+
+export CARGO_INCREMENTAL=0
+export RUSTDOCFLAGS="-Cpanic=abort"
+export RUSTFLAGS="-Zprofile -Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off -Zpanic_abort_tests -Cpanic=abort"

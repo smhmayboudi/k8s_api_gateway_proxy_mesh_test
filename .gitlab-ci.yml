@@ -60,6 +60,7 @@ rust_build:
     - "${HARBOR_REGISTRY_URL}/proxy_cache/library/docker:18.09.9-dind"
   stage: "rust_build"
   variables:
+    CARGO: "cargo"
     DOCKER_DRIVER: "overlay2"
     DOCKER_HOST: "tcp://localhost:2375"
     DOCKER_TLS_CERTDIR: ""
@@ -83,9 +84,54 @@ rust_build:
     - "${HARBOR_REGISTRY_URL}/proxy_cache/library/docker:18.09.9-dind"
   stage: "build"
   variables:
+    CARGO: "cargo"
     DOCKER_DRIVER: "overlay2"
     DOCKER_HOST: "tcp://localhost:2375"
     DOCKER_TLS_CERTDIR: ""
+    RELEASE: "--release"
+    RUST_VERSION: "1.54.0-buster"
+    VERSION: "${CI_COMMIT_TAG}"
+  when: "manual"
+
+.test: &test
+  allow_failure: false
+  artifacts:
+    expire_in: "1 week"
+    paths:
+      - "test"
+    # public: false
+    reports:
+      junit: "test/results.xml"
+    when: "always"
+  # extends:
+  #   - ".default-rule"
+  script:
+    - "${CARGO} install --locked cargo2junit"
+    - "mkdir -p test"
+    - "RUSTC_BOOTSTRAP=1 ${CARGO} test -- --format json -Zunstable-options | tee test/results.json"
+    - "cat test/results.json | cargo2junit > test/results.xml"
+  stage: "test"
+  variables:
+    CARGO: "cargo"
+    RELEASE: "--release"
+    RUST_VERSION: "1.54.0-buster"
+    VERSION: "${CI_COMMIT_TAG}"
+  when: "manual"
+
+.coverage: &coverage
+  allow_failure: true
+  artifacts:
+    expire_in: "1 week"
+    paths:
+      - "coverage"
+    # public: false
+  # extends:
+  #   - ".default-rule"
+  script:
+    - "make coverage"
+  stage: "coverage"
+  variables:
+    CARGO: "cargo"
     RELEASE: "--release"
     RUST_VERSION: "1.54.0-buster"
     VERSION: "${CI_COMMIT_TAG}"
@@ -107,6 +153,7 @@ rust_build:
       ${PACKAGE_REGISTRY_URL}/${PACKAGE}-${VERSION}-${TARGET}.sha256"
   stage: "upload"
   variables:
+    CARGO: "cargo"
     PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PACKAGE}/${VERSION}"
     RELEASE: "--release"
     RUST_VERSION: "1.54.0-buster"
@@ -152,49 +199,8 @@ rust_build:
     - "echo \"running release_job\""
   stage: "release"
   variables:
+    CARGO: "cargo"
     PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PACKAGE}/${VERSION}"
-    RELEASE: "--release"
-    RUST_VERSION: "1.54.0-buster"
-    VERSION: "${CI_COMMIT_TAG}"
-  when: "manual"
-
-.test: &test
-  allow_failure: false
-  artifacts:
-    expire_in: "1 week"
-    paths:
-      - "test"
-    # public: false
-    reports:
-      junit: "test/results.xml"
-    when: "always"
-  # extends:
-  #   - ".default-rule"
-  script:
-    - "cargo install --locked cargo2junit"
-    - "mkdir -p test"
-    - "RUSTC_BOOTSTRAP=1 make test -- -- --format json -Zunstable-options | tee test/results.json"
-    - "cat test/results.json | cargo2junit > test/results.xml"
-  stage: "test"
-  variables:
-    RELEASE: "--release"
-    RUST_VERSION: "1.54.0-buster"
-    VERSION: "${CI_COMMIT_TAG}"
-  when: "manual"
-
-.coverage: &coverage
-  allow_failure: true
-  artifacts:
-    expire_in: "1 week"
-    paths:
-      - "coverage"
-    # public: false
-  # extends:
-  #   - ".default-rule"
-  script:
-    - "make test-cov"
-  stage: "coverage"
-  variables:
     RELEASE: "--release"
     RUST_VERSION: "1.54.0-buster"
     VERSION: "${CI_COMMIT_TAG}"
@@ -213,6 +219,7 @@ rust_build:
     - "make doc"
   stage: "documentation"
   variables:
+    CARGO: "cargo"
     RELEASE: "--release"
     RUST_VERSION: "1.54.0-buster"
     VERSION: "${CI_COMMIT_TAG}"
@@ -232,10 +239,13 @@ rust_build:
     - "mv documentation public"
   stage: "pages"
   variables:
+    CARGO: "cargo"
     RELEASE: "--release"
     RUST_VERSION: "1.54.0-buster"
     VERSION: "${CI_COMMIT_TAG}"
   when: "manual"
+
+# DEPLOY
 
 .deploy: &deploy
   allow_failure: false
@@ -254,6 +264,7 @@ rust_build:
     - "docker:20.10.7-dind-rootlesss"
   stage: "deploy"
   variables:
+    CARGO: "cargo"
     DOCKER_DRIVER: "overlay2"
     DOCKER_HOST: "tcp://127.0.0.1:2376"
     DOCKER_TLS_CERTDIR: ""
@@ -275,10 +286,10 @@ rust_build:
 stages:
 - "rust_build"
 - "build"
-- "upload"
-- "release"
 - "test"
 - "coverage"
+- "upload"
+- "release"
 - "documentation"
 - "pages"
 - "deploy"

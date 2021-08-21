@@ -13,14 +13,42 @@
 
 # BEGIN actual pipeline definition
 
-# rust_build
-
 build_1:fip_api:
   dependencies: []
   extends:
     - ".build"
     - ".fip_api"
     - ".target_1"
+  needs: []
+
+build_2:fip_api:
+  dependencies: []
+  extends:
+    - ".build"
+    - ".fip_api"
+    - ".target_2"
+  needs: []
+
+build_3:fip_api:
+  dependencies: []
+  extends:
+    - ".build"
+    - ".fip_api"
+    - ".target_3"
+  needs: []
+
+test:fip_api:
+  dependencies: []
+  extends:
+    - ".test"
+    - ".fip_api"
+  needs: []
+
+coverage:fip_api:
+  dependencies: []
+  extends:
+    - ".coverage"
+    - ".fip_api"
   needs: []
 
 upload_1:fip_api:
@@ -35,14 +63,6 @@ upload_1:fip_api:
     # - "build_2:fip_api"
     # - "build_3:fip_api"
 
-build_2:fip_api:
-  dependencies: []
-  extends:
-    - ".build"
-    - ".fip_api"
-    - ".target_2"
-  needs: []
-
 upload_2:fip_api:
   dependencies:
     - "build_2:fip_api"
@@ -54,14 +74,6 @@ upload_2:fip_api:
     # - "build_1:fip_api"
     - "build_2:fip_api"
     # - "build_3:fip_api"
-
-build_3:fip_api:
-  dependencies: []
-  extends:
-    - ".build"
-    - ".fip_api"
-    - ".target_3"
-  needs: []
 
 upload_3:fip_api:
   dependencies:
@@ -85,24 +97,19 @@ release:fip_api:
     # - "upload_2:fip_api"
     - "upload_3:fip_api"
 
-test:fip_api:
-  dependencies: []
-  extends:
-    - ".test"
-    - ".fip_api"
-  needs: []
-
-coverage:fip_api:
-  dependencies: []
-  extends:
-    - ".coverage"
-    - ".fip_api"
-  needs: []
-
 documentation:fip_api:
   dependencies: []
   extends:
     - ".documentation"
+    - ".fip_api"
+  needs: []
+
+pages:fip_api:
+  dependencies:
+    - "coverage:fip_api"
+    - "documentation:fip_api"
+  extends:
+    - ".pages"
     - ".fip_api"
   needs: []
 

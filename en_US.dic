@@ -1,5 +1,14 @@
-52891
+52900
+build
+ci
+docs
+feat
+fix
+perf
+refactor
+test
 makefile
+pipeline
 A/1	1
 AA/2	1
 AAA
