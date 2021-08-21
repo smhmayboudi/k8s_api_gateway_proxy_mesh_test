@@ -88,38 +88,42 @@ The issue cannot be resolved until some other issue has been closed. See the iss
 
 A issue is stale if it there has been no activity on it for 90 days. Once a issue is determined to be stale, it will be closed after 2 weeks unless there is activity on the issue.
 
-## team::ai
+## team::artificial intelligence
 
 AI team
- 
+
 ## team::android
 
 Android team
- 
+
 ## team::backend
 
 Backend team
- 
+
 ## team::business
 
 Business team
- 
+
 ## team::devops
 
 DevOps team
- 
+
 ## team::frontend
 
 Frontend team
- 
+
 ## team::ios
 
 iOS team
- 
+
 ## team::organization
 
 Organization team
- 
+
+## team::quality control
+
+Quality Control team
+
 ## team::uxui
 
 UX/UI team
