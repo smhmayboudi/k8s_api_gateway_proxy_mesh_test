@@ -6,7 +6,7 @@
 
 # SSH Key
 
-```sh
+```shell
 $ ssh-keygen -t ed25519 -C "${EMAIL_ADDRESS}"
 $ ssh-keygen -t rsa -b 4096 -C "${EMAIL_ADDRESS}"
 $ cat ~/.ssh/id_rsa.pub
@@ -14,7 +14,7 @@ $ cat ~/.ssh/id_rsa.pub
 
 # GPG Key
 
-```sh
+```shell
 $ gpg --full-generate-key
 $ gpg --list-secret-keys --keyid-format LONG ${EMAIL_ADDRESS}
 $ gpg --armor --export ${SEC_ID}
@@ -27,7 +27,7 @@ $ git config --global user.signingkey ${SEC_ID}
 
 # Git Config
 
-```sh
+```shell
 $ git config --global branch.autoSetupRebase always
 $ git config --global color.branch true
 $ git config --global color.diff true
@@ -50,7 +50,7 @@ $ git config --global stash.showPatch true
 
 # Rustup
 
-```sh
+```shell
 $ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 $ rustup toolchain install nightly
 $ rustup +nightly component add \
@@ -78,7 +78,7 @@ $ rustup self update && \
 
 ### Install
 
-```sh
+```shell
 $ cargo install --locked \
     cargo-audit \
     cargo-cache \
@@ -97,7 +97,7 @@ $ cargo install --locked \
 
 ### Run
 
-```sh
+```shell
 $ cargo bench
 $ cargo cache --autoclean
 $ cargo check
@@ -119,7 +119,7 @@ $ cargo vendor
 
 ## Tools
 
-```sh
+```shell
 $ cargo install --locked \
     bunyan \
     critcmp \
@@ -131,7 +131,7 @@ $ cargo install --locked \
     sqlx-cli
 ```
 
-```sh
+```shell
 $ cargo bench -- --save-baseline before
 $ cargo bench -- --save-baseline change
 $ critcmp before change
@@ -139,7 +139,7 @@ $ critcmp before change
 
 # Help
 
-```sh
+```shell
 $ cargo watch -x "run | bunyan"
 
 $ grpcurl \
@@ -152,7 +152,7 @@ $ grpcurl \
 
 # Husky
 
-```sh
+```shell
 $ CARGO_HUSKY_DONT_INSTALL_HOOKS=true cargo test
 ```
 
@@ -160,7 +160,7 @@ $ CARGO_HUSKY_DONT_INSTALL_HOOKS=true cargo test
 
 https://dev.to/anshulgoyal15/a-beginners-guide-to-grpc-with-rust-3c7o
 
-```sh
+```shell
 $ openssl genrsa -des3 -out my_ca.key 2048
 $ openssl req -x509 -new -nodes -key my_ca.key -sha256 -days 1825 -out my_ca.pem
 $ openssL genrsa -out server.key 2048
@@ -177,7 +177,7 @@ $ openssl x509 -req -in server.csr -CA my_ca.pem -CAkey my_ca.key -CAcreateseria
 
 # Jaeger Tracing
 
-```sh
+```shell
 $ docker run -d -p6831:6831/udp -p6832:6832/udp -p16686:16686 jaegertracing/all-in-one:1.23.0
 $ docker run -d -p 9411:9411 openzipkin/zipkin:2.23.2
 ```
@@ -186,7 +186,7 @@ $ docker run -d -p 9411:9411 openzipkin/zipkin:2.23.2
 
 ## K8S Cluster Create
 
-```sh
+```shell
 # 1st WAY
 $ brew install kind
 $ ./kind-with-registry.sh
@@ -209,7 +209,7 @@ $ brew install k3d
 
 ## K8S Cluster Working
 
-```sh
+```shell
 $ brew install helm
 $ brew install kube-ps1
 $ brew install kubectx
@@ -218,14 +218,14 @@ $ brew install kubernetes-cli
 
 ## k8s Cluster Working with UI
 
-```sh
+```shell
 $ brew cask install lens
 $ brew cask install kui
 ```
 
 ## Walk Through
 
-```sh
+```shell
 $ brew install linkerd
 $ curl https://kind.sigs.k8s.io/examples/kind-with-registry.sh > ./script/kind-with-registry.sh
 $ chmod 777 ./script/kind-with-registry.sh
@@ -261,7 +261,7 @@ $ linkerd -n fip-api-namespace viz stat deployment
 
 # Docker
 
-```sh
+```shell
 $ docker pull curlimages/curl:7.78.0
 $ docker pull gcr.io/distroless/cc:nonroot
 $ docker pull jaegertracing/all-in-one:1.25.0
@@ -279,7 +279,7 @@ $ docker pull vectorized/redpanda:v21.7.6
 
 # Docker Content Trust
 
-```sh
+```shell
 $ docker trust key generate {NAME}
 
 # LOAD
@@ -299,7 +299,7 @@ $ docker trust revoke localhost:5000/fip-api:0.1.0-nonroot
 
 # Extra
 
-```sh
+```shell
 $ rustup target add \
     aarch64-unknown-linux-musl \
     armv7-unknown-linux-musleabihf \
@@ -317,7 +317,7 @@ $ upx --ultra-brute ./target/x86_64-unknown-linux-musl/release/fip_api
 
 # Cross Build
 
-```sh
+```shell
 # 1st WAY
 $ make release CARGO="cross" PACKAGE="fip_api" RELEASE="--release" STRIP="strip" TARGET="x86_64-unknown-linux-musl" VERSION="$(git describe --tags --abbrev=0)"
 
@@ -328,7 +328,7 @@ $ docker run -v $(pwd):/project -v /var/run/docker.sock:/var/run/docker.sock -w 
 
 # Scripts
 
-```sh
+```shell
 $ GIT_COMMITTER_DATE=$(git log -n1 --pretty=%aD) git tag -a -m "Release 0.1.0" 0.1.0
 $ git push --tags
 
@@ -344,7 +344,7 @@ $ RUSTFLAGS="-C target-cpu=native" cargo build --release
 
 # Test
 
-```sh
+```shell
 $ export CARGO_INCREMENTAL=0
 $ export RUSTDOCFLAGS="-Cpanic=abort"
 $ export RUSTFLAGS="-Zprofile -Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off -Zpanic_abort_tests -Cpanic=abort"
