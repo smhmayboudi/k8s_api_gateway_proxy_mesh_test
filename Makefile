@@ -43,9 +43,28 @@ CARGO_FMT = $(CARGO) fmt --package $(PACKAGE)
 
 CONVENTIONAL_COMMITS_LINTER = conventional_commits_linter --allow-angular-type-only --from-stdin
 HUNSPELL = hunspell -d en_US -i utf-8 -l
+HUNSPELL_DICTIONARY = en_US
 
 $(BIN): add-fmt add-target fetch
 	$(CARGO_BUILD)
+
+GIT_HOOKS_COMMIT_MSG = .git/hooks/commit-msg
+$(GIT_HOOKS_COMMIT_MSG):
+	cp .githooks/commit-msg $@
+
+GIT_HOOKS_PRE_COMMIT = .git/hooks/pre-commit
+$(GIT_HOOKS_PRE_COMMIT):
+	cp .githooks/pre-commit $@
+
+GIT_HOOKS_PRE_PUSH = .git/hooks/pre-push
+$(GIT_HOOKS_PRE_PUSH):
+	cp .githooks/pre-push $@
+
+GIT_HOOKS_PREPARE_COMMIT_MSG = .git/hooks/prepare-commit-msg
+$(GIT_HOOKS_PREPARE_COMMIT_MSG):
+	cp .githooks/prepare-commit-msg $@
+
+GIT_HOOKS = $(GIT_HOOKS_COMMIT_MSG) $(GIT_HOOKS_PRE_COMMIT) $(GIT_HOOKS_PRE_PUSH) $(GIT_HOOKS_PREPARE_COMMIT_MSG)
 
 .PHONY: add-audit
 add-audit: ## Add the audit
@@ -68,23 +87,37 @@ add-deny: ## Add the deny
 add-fmt: ## Add the fmt
 	rustup component add rustfmt
 
+.PHONY: add-git-config
+add-git-config: ## Add the git configs
+	git config --global branch.autoSetupRebase always
+	git config --global color.branch true
+	git config --global color.diff true
+	git config --global color.interactive true
+	git config --global color.status true
+	git config --global color.ui true
+	git config --global commit.gpgSign true
+	git config --global core.editor "code --wait"
+	git config --global difftool.code.cmd "code --diff \$$LOCAL \$$REMOTE --wait"
+	git config --global gpg.program gpg
+	git config --global init.defaultBranch main
+	git config --global log.date relative
+	git config --global pull.default current
+	git config --global pull.rebase true
+	git config --global push.default current
+	git config --global rebase.autoStash true
+	git config --global rerere.enabled true
+	git config --global stash.showPatch true
+
+.PHONY: add-git-hooks
+add-git-hooks: clean-git-hooks $(GIT_HOOKS) ## Add the git hooks
+
 .PHONY: add-grcov
 add-grcov: ## Add the grcov
 	$(CARGO) install --locked grcov
 
-.PHONY: add-llvm
-add-llvm: ## Add the llvm tools preview
-	rustup component add llvm-tools-preview
-
-.PHONY: add-target
-add-target: ## Add a target
-	rustup target add $(TARGET)
-
 .PHONY: add-hunspell
 add-hunspell: add-hunspell-dictionary ## Add the hunspell
 	@brew install --quiet hunspell
-
-HUNSPELL_DICTIONARY ?= en_US
 
 .PHONY: add-hunspell-dictionary
 add-hunspell-dictionary: ## Add the hunspell dictionary
@@ -93,11 +126,13 @@ add-hunspell-dictionary: ## Add the hunspell dictionary
 		curl -sSLo $(HUNSPELL_DICTIONARY).dic https://cgit.freedesktop.org/libreoffice/dictionaries/plain/en/$(HUNSPELL_DICTIONARY).dic?id=a4473e06b56bfe35187e302754f6baaa8d75e54f;\
 	fi
 
-.PHONY: help
-help: ## Help
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
-		| sort \
-		| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-33s\033[0m %s\n", $$1, $$2}'
+.PHONY: add-llvm
+add-llvm: ## Add the llvm tools preview
+	rustup component add llvm-tools-preview
+
+.PHONY: add-target
+add-target: ## Add a target
+	rustup target add $(TARGET)
 
 .PHONY: audit
 audit: add-audit ## Audit
@@ -113,23 +148,6 @@ build: clean-build $(BIN) ## Build
 .PHONY: check
 check: add-fmt add-target fetch ## Check
 	$(CARGO_CHECK)
-
-.PHONY: coverage
-coverage: add-fmt add-grcov add-llvm add-target clean-coverage fetch ## Test cov
-	RUSTC_BOOTSTRAP=1 RUSTFLAGS="-Zinstrument-coverage" $(CARGO_BUILD)
-	RUSTC_BOOTSTRAP=1 RUSTFLAGS="-Zinstrument-coverage" LLVM_PROFILE_FILE="$(PACKAGE)-%p-%m.profraw" $(CARGO_TEST)
-	grcov . \
-		--binary-path $(BIN_DIR) \
-		--branch \
-		--guess-directory-when-missing \
-		--ignore "/*" \
-		--ignore-not-existing \
-		--output-path $(COVERAGE_DIR) \
-		--output-type html \
-		--source-dir .
-	mkdir -p coverage
-	cp -R $(COVERAGE_DIR)/* coverage
-	cat coverage/coverage.json
 
 .PHONY: clean
 clean: clean-build clean-coverage clean-doc clean-release ## Clean
@@ -153,6 +171,10 @@ clean-doc: add-target ## Clean doc
 	rm -fr $(DOCUMENTATION_DIR)
 	rm -fr documentation
 
+.PHONY: clean-git-hooks
+clean-git-hooks: ## Clean git hooks
+	rm -fr $(GIT_HOOKS)
+
 .PHONY: clean-release
 clean-release: add-target ## Clean release
 	rm -fr release
@@ -164,6 +186,23 @@ clippy: add-clippy add-fmt fetch ## Clippy
 .PHONY: conventional-commits-linter
 conventional-commits-linter: add-conventional-commits-linter ## Conventional commits linter
 	$(CONVENTIONAL_COMMITS_LINTER)
+
+.PHONY: coverage
+coverage: add-fmt add-grcov add-llvm add-target clean-coverage fetch ## Test cov
+	RUSTC_BOOTSTRAP=1 RUSTFLAGS="-Zinstrument-coverage" $(CARGO_BUILD)
+	RUSTC_BOOTSTRAP=1 RUSTFLAGS="-Zinstrument-coverage" LLVM_PROFILE_FILE="$(PACKAGE)-%p-%m.profraw" $(CARGO_TEST)
+	grcov . \
+		--binary-path $(BIN_DIR) \
+		--branch \
+		--guess-directory-when-missing \
+		--ignore "/*" \
+		--ignore-not-existing \
+		--output-path $(COVERAGE_DIR) \
+		--output-type html \
+		--source-dir .
+	mkdir -p coverage
+	cp -R $(COVERAGE_DIR)/* coverage
+	cat coverage/coverage.json
 
 .PHONY: deny-check
 deny-check: add-deny fetch ## Deny check
@@ -191,14 +230,6 @@ fetch: Cargo.lock ## Fetch
 fix: ## Fix
 	$(CARGO_FIX)
 
-.PHONY: hunspell
-hunspell: add-hunspell ## Hunspell
-	@$(HUNSPELL)
-
-.PHONY: run
-run: ## Run
-	$(CARGO_RUN)
-
 .PHONY: fmt
 fmt: add-fmt ## FMT
 	$(CARGO_FMT)
@@ -206,6 +237,19 @@ fmt: add-fmt ## FMT
 .PHONY: fmt-check
 fmt-check: add-fmt ## FMT check
 	$(CARGO_FMT) -- --check
+
+.PHONY: git
+git: add-git-config add-git-hooks ## Add git config & hooks
+
+.PHONY: help
+help: ## Help
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
+		| sort \
+		| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-33s\033[0m %s\n", $$1, $$2}'
+
+.PHONY: hunspell
+hunspell: add-hunspell ## Hunspell
+	@$(HUNSPELL)
 
 .PHONY: release
 release: $(BIN) ## Release
@@ -215,64 +259,13 @@ release: $(BIN) ## Release
 	shasum -a 256 release/$(BIN_NAME) \
 		| cut -d " " -f 1 > release/$(BIN_NAME).sha256
 
+.PHONY: run
+run: ## Run
+	$(CARGO_RUN)
+
 .PHONY: test
 test: add-fmt add-target fetch ## Test
 	$(CARGO_TEST)
-
-# # # # # #
-#         #
-#   GIT   #
-#         #
-# # # # # #
-
-GIT_HOOKS_COMMIT_MSG = .git/hooks/commit-msg
-$(GIT_HOOKS_COMMIT_MSG):
-	cp .githooks/commit-msg $@
-
-GIT_HOOKS_PRE_COMMIT = .git/hooks/pre-commit
-$(GIT_HOOKS_PRE_COMMIT):
-	cp .githooks/pre-commit $@
-
-GIT_HOOKS_PRE_PUSH = .git/hooks/pre-push
-$(GIT_HOOKS_PRE_PUSH):
-	cp .githooks/pre-push $@
-
-GIT_HOOKS_PREPARE_COMMIT_MSG = .git/hooks/prepare-commit-msg
-$(GIT_HOOKS_PREPARE_COMMIT_MSG):
-	cp .githooks/prepare-commit-msg $@
-
-GIT_HOOKS = $(GIT_HOOKS_COMMIT_MSG) $(GIT_HOOKS_PRE_COMMIT) $(GIT_HOOKS_PRE_PUSH) $(GIT_HOOKS_PREPARE_COMMIT_MSG)
-
-.PHONY: add-git-config
-add-git-config: ## Add git configs
-	git config --global branch.autoSetupRebase always
-	git config --global color.branch true
-	git config --global color.diff true
-	git config --global color.interactive true
-	git config --global color.status true
-	git config --global color.ui true
-	git config --global commit.gpgSign true
-	git config --global core.editor "code --wait"
-	git config --global difftool.code.cmd "code --diff \$$LOCAL \$$REMOTE --wait"
-	git config --global gpg.program gpg
-	git config --global init.defaultBranch main
-	git config --global log.date relative
-	git config --global pull.default current
-	git config --global pull.rebase true
-	git config --global push.default current
-	git config --global rebase.autoStash true
-	git config --global rerere.enabled true
-	git config --global stash.showPatch true
-
-.PHONY: add-git-hooks
-add-git-hooks: clean-git-hooks $(GIT_HOOKS) ## Add git hooks
-
-.PHONY: clean-git-hooks
-clean-git-hooks: ## Clean git hooks
-	rm -fr $(GIT_HOOKS)
-
-.PHONY: git
-git: add-git-config add-git-hooks ## Add git config & hooks
 
 
 

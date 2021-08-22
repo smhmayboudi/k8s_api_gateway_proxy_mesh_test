@@ -111,15 +111,6 @@ pages:fip_api:
   extends:
     - ".pages"
     - ".fip_api"
-  needs: []
-
-pages:fip_api:
-  dependencies:
-    - "coverage:fip_api"
-    - "documentation:fip_api"
-  extends:
-    - ".pages"
-    - ".fip_api"
   needs:
     - "coverage:fip_api"
     - "documentation:fip_api"

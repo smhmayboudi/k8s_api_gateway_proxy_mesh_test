@@ -297,13 +297,6 @@ $ docker trust inspect --pretty localhost:5000/fip-api:0.1.0-nonroot
 $ docker trust revoke localhost:5000/fip-api:0.1.0-nonroot
 ```
 
-# Note
-
-Created => 1970-01-01T00:00:00Z
-"Metadata": {
-    "LastTagTime": "0001-01-01T00:00:00Z"
-}
-
 # Extra
 
 ```sh
@@ -323,6 +316,7 @@ $ upx --ultra-brute ./target/x86_64-unknown-linux-musl/release/fip_api
 ```
 
 # Cross Build
+
 ```sh
 # 1st WAY
 $ make release CARGO="cross" PACKAGE="fip_api" RELEASE="--release" STRIP="strip" TARGET="x86_64-unknown-linux-musl" VERSION="$(git describe --tags --abbrev=0)"
@@ -333,6 +327,7 @@ $ docker run -v $(pwd):/project -v /var/run/docker.sock:/var/run/docker.sock -w 
 ```
 
 # Scripts
+
 ```sh
 $ GIT_COMMITTER_DATE=$(git log -n1 --pretty=%aD) git tag -a -m "Release 0.1.0" 0.1.0
 $ git push --tags
@@ -347,8 +342,10 @@ $ perf report --hierarchy -M intel
 $ RUSTFLAGS="-C target-cpu=native" cargo build --release
 ```
 
+# Test
 
-
-export CARGO_INCREMENTAL=0
-export RUSTDOCFLAGS="-Cpanic=abort"
-export RUSTFLAGS="-Zprofile -Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off -Zpanic_abort_tests -Cpanic=abort"
+```sh
+$ export CARGO_INCREMENTAL=0
+$ export RUSTDOCFLAGS="-Cpanic=abort"
+$ export RUSTFLAGS="-Zprofile -Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off -Zpanic_abort_tests -Cpanic=abort"
+```
