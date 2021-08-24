@@ -72,21 +72,37 @@ This label indicates that a bug has been reported, but has not been successfully
 
 This label indicates that a better test coverage is required to resolve the issue. New tests should be proposed via a pull request.
 
-## pr::hotfix
+## product::playpod
 
-Pull request was applied directly to production after a release. These pull requests still need review to be merged into the next release.
+Playpod product
 
-## pr::work in progress
+## product::arium
 
-Pull Requests that are not complete yet. A final review is not possible yet, but every Pull Request is open for discussion.
+Arium product
+
+## product::podbox
+
+Podbox product
+
+## product::kidzy
+
+Kidzy product
 
 ## status::blocked
 
 The issue cannot be resolved until some other issue has been closed. See the issue’s log for which issue is blocking this issue.
 
+## status::hotfix
+
+Issues/Pull request was applied directly to production after a release. These issue/pull requests still need review to be merged into the next release.
+
 ## status::stale
 
 A issue is stale if it there has been no activity on it for 90 days. Once a issue is determined to be stale, it will be closed after 2 weeks unless there is activity on the issue.
+
+## status::work in progress
+
+Issues/Pull Requests that are not complete yet. A final review is not possible yet, but every issue/pull request is open for discussion.
 
 ## team::artificial intelligence
 
@@ -103,6 +119,10 @@ Backend team
 ## team::business
 
 Business team
+
+## team::content
+
+Content team
 
 ## team::devops
 
