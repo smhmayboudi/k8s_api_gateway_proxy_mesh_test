@@ -12,7 +12,7 @@
 
 [dependencies]
 opentelemetry = { default-features = false, features = ["trace"], version = "0.15.0" }
-thiserror = { default-features = false, version = "1.0.26" }
+thiserror = { default-features = false, version = "1.0.29" }
 tonic = { default-features = false, features = ["transport"], version = "0.5.2" }
 tracing-error = { default-features = false, version = "0.1.2" }
 
