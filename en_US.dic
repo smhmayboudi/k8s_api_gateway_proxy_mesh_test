@@ -1,4 +1,4 @@
-52900
+52901
 build
 ci
 docs
@@ -9,6 +9,8 @@ refactor
 test
 makefile
 pipeline
+config
+configs
 A/1	1
 AA/2	1
 AAA

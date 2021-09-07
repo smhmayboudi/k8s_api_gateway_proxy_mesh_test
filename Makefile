@@ -69,7 +69,7 @@ GIT_HOOKS = $(GIT_HOOKS_COMMIT_MSG) $(GIT_HOOKS_PRE_COMMIT) $(GIT_HOOKS_PRE_PUSH
 .PHONY: add-audit
 add-audit: ## Add the audit
 	$(CARGO) install cargo-audit
-	$(CARGO) generate-lockfile
+	@$(MAKE) generate-lockfile
 
 .PHONY: add-clippy
 add-clippy: ## Add the clippy
@@ -96,6 +96,7 @@ add-git-config: ## Add the git configs
 	git config --global color.status true
 	git config --global color.ui true
 	git config --global commit.gpgSign true
+	git config --global core.autocrlf input
 	git config --global core.editor "code --wait"
 	git config --global difftool.code.cmd "code --diff \$$LOCAL \$$REMOTE --wait"
 	git config --global gpg.program gpg
@@ -237,6 +238,10 @@ fmt: add-fmt ## FMT
 .PHONY: fmt-check
 fmt-check: add-fmt ## FMT check
 	$(CARGO_FMT) -- --check
+
+.PHONY: generate-lockfile
+generate-lockfile: ## Generate lockfile
+	$(CARGO) generate-lockfile
 
 .PHONY: git
 git: add-git-config add-git-hooks ## Add git config & hooks
