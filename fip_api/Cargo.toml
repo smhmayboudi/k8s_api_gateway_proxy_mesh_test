@@ -35,7 +35,7 @@ serde = { default-features = false, features = ["derive"], version = "1.0.130" }
 tokio = { default-features = false, features = ["macros", "rt-multi-thread", "time"], version = "1.11.0" }
 tonic = { default-features = false, features = ["transport"], version = "0.5.2" }
 tonic-health = { default-features = false, features = ["transport"], version = "0.4.1" }
-tracing = { default-features = false, version = "0.1.26" }
+tracing = { default-features = false, version = "0.1.27" }
 tracing-appender = { default-features = false, version = "0.1.2" }
 tracing-bunyan-formatter = { default-features = false, version = "0.2.5" }
 tracing-error = { default-features = false, version = "0.1.2" }
