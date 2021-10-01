@@ -73,7 +73,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         name: release
-        uses: softprops/action-gh-release@fb0163a75bee697a9cfec2c931801de7c7f10042
+        uses: softprops/action-gh-release@2d72d869af3bf23602f9593a1e3fd739b80ac1eb
         with:
           files: artifacts/**/*
           name: ${{ steps.release-tag-meta.outputs.name }}
