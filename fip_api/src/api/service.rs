@@ -1,6 +1,6 @@
 use crate::api::{
     config::Config,
-    proto::server::{ApiHelloWorldReqDto, ApiResDto},
+    proto::server::{ApiHelloWorldReq, ApiRes},
 };
 use fip_common::common_error::CommonError;
 
@@ -17,7 +17,7 @@ impl Service {
 
 impl Service {
     #[tracing::instrument(fields(otel.kind = "client"))]
-    pub async fn hello_world(&self, req: &ApiHelloWorldReqDto) -> Result<ApiResDto, CommonError> {
-        Ok(ApiResDto { id: req.id.clone() })
+    pub async fn hello_world(&self, req: &ApiHelloWorldReq) -> Result<ApiRes, CommonError> {
+        Ok(ApiRes { id: req.id.clone() })
     }
 }

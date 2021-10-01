@@ -1,6 +1,6 @@
 use crate::api::{
     config::Config,
-    proto::server::{api_server::Api, ApiHelloWorldReqDto, ApiResDto},
+    proto::server::{api_server::Api, ApiHelloWorldReq, ApiRes},
     service::Service,
 };
 // use fip_common::common_opentelemetry::MetadataMap;
@@ -25,8 +25,8 @@ impl Api for Controller {
     #[tracing::instrument(fields(otel.kind = "server"))]
     async fn hello_world(
         &self,
-        request: Request<ApiHelloWorldReqDto>,
-    ) -> Result<Response<ApiResDto>, Status> {
+        request: Request<ApiHelloWorldReq>,
+    ) -> Result<Response<ApiRes>, Status> {
         // TODO: test features for fip_api
         // #[cfg(feature = "attributes")]
         // tracing::error!("features = [\"attributes\"]");

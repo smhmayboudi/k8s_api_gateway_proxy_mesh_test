@@ -5,12 +5,12 @@ set -o errexit
 set -o pipefail
 set -o nounset
 
-for FILE in $(git diff-index --cached --name-only --diff-filter=AM HEAD | grep .rs | grep -v 'D' | grep -v 'R'); do
-	test "$(cat $FILE | make hunspell | sort | uniq -c)" == "" || {
-		echo >&2 "hunspell found (a) misspelled word(s) on \"$(cat $FILE)\""
-		exit 1
-	}
-done
+# for FILE in $(git diff-index --cached --name-only --diff-filter=AM HEAD | grep .rs | grep -v 'D' | grep -v 'R'); do
+# 	test "$(cat $FILE | make hunspell | sort | uniq -c)" == "" || {
+# 		echo >&2 "hunspell found (a) misspelled word(s) on \"$FILE\""
+# 		exit 1
+# 	}
+# done
 
 make clippy fmt-check
 

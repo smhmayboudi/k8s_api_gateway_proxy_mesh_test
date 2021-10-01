@@ -3,13 +3,13 @@ syntax = "proto3";
 package fip.api.api;
 
 service Api {
-    rpc HelloWorld (ApiHelloWorldReqDto) returns (ApiResDto);
+    rpc HelloWorld (ApiHelloWorldReq) returns (ApiRes);
 }
 
-message ApiHelloWorldReqDto {
+message ApiHelloWorldReq {
     string id = 1;
 }
 
-message ApiResDto {
+message ApiRes {
     string id = 1;
 }
