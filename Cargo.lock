@@ -147,7 +147,7 @@ dependencies = [
  "dotenv",
  "envy",
  "fip_common",
- "opentelemetry",
+ "opentelemetry 0.15.0",
  "opentelemetry-zipkin",
  "prost",
  "serde",
@@ -167,7 +167,7 @@ dependencies = [
 name = "fip_common"
 version = "0.1.0"
 dependencies = [
- "opentelemetry",
+ "opentelemetry 0.15.0",
  "thiserror",
  "tonic",
  "tracing-error",
@@ -614,6 +614,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "opentelemetry"
+version = "0.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e1cf9b1c4e9a6c4de793c632496fa490bdc0e1eea73f0c91394f7b6990935d22"
+dependencies = [
+ "async-trait",
+ "crossbeam-channel",
+ "futures",
+ "js-sys",
+ "lazy_static",
+ "percent-encoding",
+ "pin-project",
+ "rand",
+ "thiserror",
+]
+
+[[package]]
 name = "opentelemetry-http"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -623,7 +640,7 @@ dependencies = [
  "bytes",
  "futures-util",
  "http",
- "opentelemetry",
+ "opentelemetry 0.15.0",
  "reqwest",
 ]
 
@@ -645,7 +662,7 @@ dependencies = [
  "async-trait",
  "http",
  "lazy_static",
- "opentelemetry",
+ "opentelemetry 0.15.0",
  "opentelemetry-http",
  "opentelemetry-semantic-conventions",
  "reqwest",
@@ -1307,7 +1324,7 @@ version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "599f388ecb26b28d9c1b2e4437ae019a7b336018b45ed911458cd9ebf91129f6"
 dependencies = [
- "opentelemetry",
+ "opentelemetry 0.16.0",
  "tracing",
  "tracing-core",
  "tracing-log",
